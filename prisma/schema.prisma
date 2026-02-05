@@ -11,3 +11,77 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Enums ---
+enum Role {
+  ADMIN
+  ENDUSER
+  DRONE
+}
+
+enum DroneStatus {
+  IDLE
+  DELIVERING
+  BROKEN
+  RETURNING
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  DELIVERED
+  FAILED
+}
+
+// --- Models ---
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  role     Role   // Links to the Role enum above
+  orders   Order[] // Relation: User has many orders
+}
+
+model Drone {
+  id             Int         @id @default(autoincrement())
+  battery        Int         @default(100)
+  lat            Float       @default(0.0) // Initial logic: 0.0
+  long           Float       @default(0.0)
+  status         DroneStatus @default(IDLE)
+  
+  // Relation: A drone can have one active order at a time
+  currentOrder   Order?      @relation("DroneCurrentOrder") 
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  origin      String      // Store as "lat,long" string
+  destination String      // Store as "lat,long" string
+  status      OrderStatus @default(PENDING)
+  
+  // Relations
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+  
+  // The drone currently carrying this order
+  droneId     Int?        @unique // Unique ensures a drone has only one active order
+  drone       Drone?      @relation("DroneCurrentOrder", fields: [droneId], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
