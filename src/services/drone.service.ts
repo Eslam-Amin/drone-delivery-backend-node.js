@@ -4,8 +4,10 @@ const prisma = new PrismaClient();
 
 class DroneService {
   // List all drones (for Admin)
-  async findAll() {
-    return prisma.drone.findMany();
+  async findAll(query: { status?: DroneStatus }) {
+    return prisma.drone.findMany({
+      where: query
+    });
   }
 
   // Find a specific drone
@@ -42,6 +44,51 @@ class DroneService {
       },
       include: { currentOrder: true }
     });
+  }
+
+  // The "Rescue" Logic
+  async reportBroken(droneId: number) {
+    // 1. Fetch Drone
+    const drone = await prisma.drone.findUnique({
+      where: { id: droneId }
+    });
+
+    if (!drone) {
+      throw new Error("Drone not found");
+    }
+
+    // 2. Find active order assigned to this drone
+    const activeOrder = await prisma.order.findUnique({
+      where: { droneId: droneId }
+    });
+
+    // 3. Update Drone Status
+    await prisma.drone.update({
+      where: { id: droneId },
+      data: {
+        status: "BROKEN",
+        currentOrder: { disconnect: true }
+      }
+    });
+
+    // 4. Rescue Order if exists
+    if (activeOrder) {
+      await prisma.order.update({
+        where: { id: activeOrder.id },
+        data: {
+          status: "PENDING",
+          droneId: null,
+          // Origin becomes the broken drone's location
+          origin: `${drone.lat},${drone.lng}`
+        }
+      });
+
+      return {
+        message: "Drone marked BROKEN. Order requeued from rescue location."
+      };
+    }
+
+    return { message: "Drone marked BROKEN. No active order." };
   }
 }
 
