@@ -4,14 +4,14 @@ const prisma = new PrismaClient();
 
 class DroneService {
   // List all drones (for Admin)
-  async findAll(query: { status?: DroneStatus }) {
+  async getAll(query: { status?: DroneStatus }) {
     return prisma.drone.findMany({
       where: query
     });
   }
 
   // Find a specific drone
-  async findOneById(droneId: number) {
+  async getOneById(droneId: number) {
     const drone = await prisma.drone.findUnique({ where: { id: droneId } });
     if (!drone) throw new Error("Drone not found");
     return drone;
