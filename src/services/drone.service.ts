@@ -7,6 +7,14 @@ class DroneService {
   async findAll() {
     return prisma.drone.findMany();
   }
+
+  // Find a specific drone
+  async findOneById(droneId: number) {
+    const drone = await prisma.drone.findUnique({ where: { id: droneId } });
+    if (!drone) throw new Error("Drone not found");
+    return drone;
+  }
+
   // Update Location & Battery
   async updateHeartbeat(droneId: number, data: UpdateHeartbeatDto) {
     return prisma.drone.update({
