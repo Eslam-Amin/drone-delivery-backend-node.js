@@ -12,7 +12,7 @@ export const config = {
       secret: process.env.JWT_REFRESH_SECRET || "dev_secret_do_not_use_in_prod",
       expiresIn: "7d"
     },
-    secret: process.env.JWT_SECRET,
+    secret: process.env.JWT_SECRET || "dev_secret_do_not_use_in_prod",
     expiresIn: "15d"
   },
   dbUrl: process.env.DATABASE_URL
