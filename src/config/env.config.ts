@@ -10,10 +10,10 @@ export const config = {
     },
     refresh: {
       secret: process.env.JWT_REFRESH_SECRET || "dev_secret_do_not_use_in_prod",
-      expiresIn: "1h"
+      expiresIn: "7d"
     },
     secret: process.env.JWT_SECRET,
-    expiresIn: "1h"
+    expiresIn: "15d"
   },
   dbUrl: process.env.DATABASE_URL
 };
