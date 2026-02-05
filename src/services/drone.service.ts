@@ -66,7 +66,7 @@ class DroneService {
     await prisma.drone.update({
       where: { id: droneId },
       data: {
-        status: "BROKEN",
+        status: DroneStatus.BROKEN,
         currentOrder: { disconnect: true }
       }
     });
@@ -76,7 +76,7 @@ class DroneService {
       await prisma.order.update({
         where: { id: activeOrder.id },
         data: {
-          status: "PENDING",
+          status: OrderStatus.PENDING,
           droneId: null,
           // Origin becomes the broken drone's location
           origin: `${drone.lat},${drone.lng}`
