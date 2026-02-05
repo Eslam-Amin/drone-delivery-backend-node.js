@@ -25,6 +25,19 @@ class OrderService {
     return order;
   }
 
+  // Enduser Withdraws Order
+  async withdrawOrder(orderId: number, userId: number) {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    });
+    if (!order) throw new Error("Order not found");
+    if (order.userId !== userId) throw new Error("unauthorized");
+    if (order.status !== OrderStatus.PENDING)
+      throw new Error("Cannot withdraw order already in progress");
+
+    return prisma.order.delete({ where: { id: orderId } });
+  }
+
   // Admin Bulk Get
   async getAll() {
     return prisma.order.findMany();
