@@ -4,8 +4,10 @@ const prisma = new PrismaClient();
 
 class DroneService {
   // List all drones (for Admin)
-  async findAll() {
-    return prisma.drone.findMany();
+  async findAll(query: { status?: DroneStatus }) {
+    return prisma.drone.findMany({
+      where: query
+    });
   }
 
   // Find a specific drone
