@@ -12,3 +12,4 @@ export const UpdateDroneStatusSchema = z.object({
 });
 
 export type UpdateHeartbeatDto = z.infer<typeof UpdateHeartbeatSchema>;
+export type UpdateDroneStatusDto = z.infer<typeof UpdateDroneStatusSchema>;
