@@ -7,10 +7,12 @@ export const auth = (allowedRoles: string[]) => {
     if (!header)
       return res.status(401).json({ error: "Missing Authorization header" });
 
-    const token = header.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "Missing token" });
+    const token = header.split(" ");
+    if (token[0] !== "Bearer")
+      return res.status(401).json({ error: "Invalid Authorization header" });
+    if (!token[1]) return res.status(401).json({ error: "Missing token" });
     try {
-      const decoded = verifyToken(token);
+      const decoded = verifyToken(token[1]);
       if (!allowedRoles.includes(decoded.role)) {
         return res.status(403).json({ error: "Access Forbidden" });
       }
