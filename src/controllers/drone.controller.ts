@@ -5,7 +5,11 @@ class DroneController {
   async createDrone(req: Request, res: Response) {
     try {
       const result = await droneService.createOne(req.body);
-      res.json(result);
+      res.status(201).json({
+        success: true,
+        message: "Drone Created Successfully",
+        data: result
+      });
     } catch (err) {
       res.status(500).json({ error: err });
     }
@@ -14,7 +18,12 @@ class DroneController {
   async getAllDrones(req: Request, res: Response) {
     try {
       const result = await droneService.getAll(req.query);
-      res.json(result);
+
+      res.status(200).json({
+        success: true,
+        message: "Drones fetched successfully",
+        data: result
+      });
     } catch (err) {
       res.status(500).json({ error: err });
     }
@@ -24,7 +33,11 @@ class DroneController {
       const droneId = (req as any).entity.id;
 
       const result = await droneService.updateHeartbeat(droneId, req.body);
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        message: "Heartbeat updated successfully",
+        data: result
+      });
     } catch (err) {
       res.status(500).json({ error: err });
     }
@@ -34,7 +47,11 @@ class DroneController {
     try {
       const { droneId } = req.body;
       const result = await droneService.reportBroken(droneId);
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        message: "Drone reported as broken successfully",
+        data: result
+      });
     } catch (e) {
       res.status(500).json({ error: "Failed to report broken status" });
     }
