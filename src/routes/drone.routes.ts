@@ -3,14 +3,18 @@ import { auth } from "../middlewares/auth.middleware";
 import droneController from "../controllers/drone.controller";
 import { Role } from "@prisma/client";
 import { validate } from "../middlewares/validator.middleware";
-import { UpdateHeartbeatSchema } from "../dtos/drone.dto";
+import { CreateDroneSchema, UpdateHeartbeatSchema } from "../dtos/drone.dto";
 
 const router = Router();
 
 router
   .route("/")
   .get(auth([Role.ADMIN]), droneController.getAllDrones)
-  .post(auth([Role.ADMIN]), droneController.createDrone);
+  .post(
+    auth([Role.ADMIN]),
+    validate(CreateDroneSchema),
+    droneController.createDrone
+  );
 
 // Drones only endpoints
 router.post(
