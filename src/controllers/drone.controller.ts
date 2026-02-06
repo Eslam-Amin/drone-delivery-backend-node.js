@@ -8,8 +8,8 @@ class DroneController {
 
       const result = await droneService.updateHeartbeat(droneId, req.body);
       res.json(result);
-    } catch (e) {
-      res.status(500).json({ error: "Update failed" });
+    } catch (err) {
+      res.status(500).json({ error: err });
     }
   }
 
