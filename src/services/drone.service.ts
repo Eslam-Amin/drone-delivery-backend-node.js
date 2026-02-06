@@ -3,6 +3,11 @@ import { UpdateHeartbeatDto } from "../dtos/drone.dto";
 import { prisma } from "../config/database";
 
 class DroneService {
+  // Create a drone (for Admin)
+  async createOne(data: any) {
+    return prisma.drone.create({ data });
+  }
+
   // List all drones (for Admin)
   async getAll(query: { status?: DroneStatus }) {
     return prisma.drone.findMany({
