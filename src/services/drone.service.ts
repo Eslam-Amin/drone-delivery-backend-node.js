@@ -1,10 +1,10 @@
 import { DroneStatus, OrderStatus } from "@prisma/client";
-import { UpdateHeartbeatDto } from "../dtos/drone.dto";
+import { CreateDroneDto, UpdateHeartbeatDto } from "../dtos/drone.dto";
 import { prisma } from "../config/database";
 
 class DroneService {
   // Create a drone (for Admin)
-  async createOne(data: any) {
+  async createOne(data: CreateDroneDto) {
     return prisma.drone.create({ data });
   }
 
