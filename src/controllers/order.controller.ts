@@ -14,7 +14,7 @@ class OrderController {
     res.json(order);
   };
 
-  listOrders = async (req: Request, res: Response) => {
+  listOrders = async (_req: Request, res: Response) => {
     const orders = await orderService.getAll();
     res.json(orders);
   };
