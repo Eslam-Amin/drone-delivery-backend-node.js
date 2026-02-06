@@ -8,7 +8,11 @@ export const CreateDroneSchema = z.object({
 });
 
 export const UpdateDroneSchema = z.object({
-  status: z.enum(DroneStatus),
+  status: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(z.enum(DroneStatus))
+    .optional(),
   battery: z.number().min(0).max(100).optional(),
   lat: z.number().min(-90).max(90).optional(),
   lng: z.number().min(-180).max(180).optional()
