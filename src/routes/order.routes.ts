@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { auth } from "../middlewares/auth.middleware";
 import { Role } from "@prisma/client";
-import { CreateOrderSchema } from "../dtos/order.dto";
+import { CreateOrderSchema, UpdateOrderSchema } from "../dtos/order.dto";
 import { validate } from "../middlewares/validator.middleware";
 import orderController from "../controllers/order.controller";
 
@@ -21,7 +21,11 @@ router.get("/me", auth([Role.ENDUSER]), orderController.getUsersOrders);
 router
   .route("/:orderId")
   .get(auth([Role.ADMIN]), orderController.getOrder)
-  .patch(auth([Role.ADMIN]), orderController.updateOrder);
+  .patch(
+    auth([Role.ADMIN]),
+    validate(UpdateOrderSchema),
+    orderController.updateOrder
+  );
 
 router.patch(
   "/:orderId/withdraw",
