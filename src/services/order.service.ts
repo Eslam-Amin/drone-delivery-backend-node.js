@@ -1,5 +1,5 @@
-import { OrderStatus } from "@prisma/client";
-import { CreateOrderDto, UpdateOrderDestDto } from "../dtos/order.dto";
+import { OrderStatus, Prisma } from "@prisma/client";
+import { CreateOrderDto, UpdateOrderDto } from "../dtos/order.dto";
 import { prisma } from "../config/database";
 
 class OrderService {
@@ -30,7 +30,13 @@ class OrderService {
     return prisma.order.findMany();
   }
 
-  async updateOneById(orderId: number, data: UpdateOrderDestDto) {
+  async updateOneById(orderId: number, dto: UpdateOrderDto) {
+    const data: Prisma.OrderUpdateInput = {
+      ...(dto.destination !== undefined && { destination: dto.destination }),
+      ...(dto.origin !== undefined && { origin: dto.origin })
+    };
+    await this.getOneById(orderId);
+
     return prisma.order.update({
       where: { id: orderId },
       data
