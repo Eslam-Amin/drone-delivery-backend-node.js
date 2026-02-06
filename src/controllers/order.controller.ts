@@ -69,6 +69,20 @@ class OrderController {
       res.status(500).json({ error: "Failed to withdraw order" });
     }
   }
+
+  async getUsersOrders(req: Request, res: Response) {
+    try {
+      const userId = (req as any).entity.id;
+      const orders = await orderService.getAllByUser(userId);
+      res.status(200).json({
+        success: true,
+        message: "Orders Fetched Successfully",
+        data: orders
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order" });
+    }
+  }
 }
 
 export default new OrderController();

@@ -49,6 +49,10 @@ class OrderService {
 
     return prisma.order.delete({ where: { id: orderId } });
   }
+
+  async getAllByUser(userId: number) {
+    return prisma.order.findMany({ where: { userId } });
+  }
 }
 
 export default new OrderService();

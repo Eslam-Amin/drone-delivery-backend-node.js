@@ -17,7 +17,11 @@ router
   )
   .get(auth([Role.ADMIN]), orderController.listOrders);
 
-router.patch("/:orderId", auth([Role.ADMIN]), orderController.updateOrder);
+router.get("/me", auth([Role.ENDUSER]), orderController.getUsersOrders);
+router
+  .route("/:orderId")
+  .get(auth([Role.ADMIN]), orderController.getOrder)
+  .patch(auth([Role.ADMIN]), orderController.updateOrder);
 
 router.patch(
   "/:orderId/withdraw",
