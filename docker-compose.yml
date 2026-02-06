@@ -20,5 +20,16 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: penny_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@penny.co
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:
