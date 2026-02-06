@@ -35,7 +35,7 @@ class DroneService {
     }
 
     const data: Prisma.DroneUpdateInput = {
-      status: dto.status,
+      ...(dto.status !== undefined && { status: dto.status }),
       ...(dto.battery !== undefined && { battery: dto.battery }),
       ...(dto.lat !== undefined && { lat: dto.lat }),
       ...(dto.lng !== undefined && { lng: dto.lng })
