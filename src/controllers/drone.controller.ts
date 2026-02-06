@@ -2,6 +2,23 @@ import { Request, Response } from "express";
 import droneService from "../services/drone.service";
 
 class DroneController {
+  async createDrone(req: Request, res: Response) {
+    try {
+      const result = await droneService.createOne(req.body);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: err });
+    }
+  }
+
+  async getAllDrones(req: Request, res: Response) {
+    try {
+      const result = await droneService.getAll(req.query);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: err });
+    }
+  }
   async updateHeartbeat(req: Request, res: Response) {
     try {
       const droneId = (req as any).entity.id;
