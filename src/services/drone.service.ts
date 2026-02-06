@@ -1,4 +1,4 @@
-import { DroneStatus, OrderStatus } from "@prisma/client";
+import { DroneStatus, OrderStatus, Prisma } from "@prisma/client";
 import {
   CreateDroneDto,
   UpdateDroneDto,
@@ -26,12 +26,25 @@ class DroneService {
     return drone;
   }
 
-  async updateOneById(droneId: number, data: UpdateDroneDto) {
-    if (data.status === DroneStatus.BROKEN) {
-      return await this.reportBroken(droneId);
-    } else {
-      return prisma.drone.update({ where: { id: droneId }, data });
+  async updateOneById(droneId: number, dto: UpdateDroneDto) {
+    const drone = await this.getOneById(droneId);
+    if (dto.status === DroneStatus.BROKEN) {
+      if (drone.status === DroneStatus.BROKEN)
+        throw new Error("Drone is already reported as broken");
+      return this.reportBroken(droneId);
     }
+
+    const data: Prisma.DroneUpdateInput = {
+      status: dto.status,
+      ...(dto.battery !== undefined && { battery: dto.battery }),
+      ...(dto.lat !== undefined && { lat: dto.lat }),
+      ...(dto.lng !== undefined && { lng: dto.lng })
+    };
+
+    return prisma.drone.update({
+      where: { id: droneId },
+      data
+    });
   }
 
   // Update Location & Battery
