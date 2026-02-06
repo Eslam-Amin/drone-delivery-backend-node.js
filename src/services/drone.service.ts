@@ -74,7 +74,7 @@ class DroneService {
     return prisma.drone.update({
       where: { id: droneId },
       data: {
-        status: DroneStatus.DELIVERING,
+        status: DroneStatus.RESERVED,
         currentOrder: { connect: { id: order.id } }
       },
       include: { currentOrder: true }
