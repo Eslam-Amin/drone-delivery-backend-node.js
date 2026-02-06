@@ -98,6 +98,23 @@ class DroneController {
       res.status(500).json({ error: err.message || "Failed to reserve drone" });
     }
   }
+
+  async grabOrder(req: Request, res: Response) {
+    try {
+      const droneId = (req as any).entity.id;
+      const result = await droneService.grabOrder(droneId);
+
+      res.status(200).json({
+        success: true,
+        message: result.ok
+          ? "Drone grabbed order successfully"
+          : result.message,
+        data: result.ok ? result.order : undefined
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to reserve drone" });
+    }
+  }
 }
 
 export default new DroneController();
