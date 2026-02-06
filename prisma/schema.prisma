@@ -45,9 +45,10 @@ model User {
 model Drone {
   id             Int         @id @default(autoincrement())
   battery        Int         @default(100)
-  lat            Float       @default(0.0) // Initial logic: 0.0
+  lat            Float       @default(0.0) 
   lng           Float       @default(0.0)
   status         DroneStatus @default(IDLE)
+  speed         Int         @default(40)
   
   // Relation: A drone can have one active order at a time
   currentOrder   Order?      @relation("DroneCurrentOrder") 

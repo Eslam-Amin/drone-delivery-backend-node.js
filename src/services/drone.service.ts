@@ -1,8 +1,17 @@
-import { DroneStatus, OrderStatus } from "@prisma/client";
-import { UpdateHeartbeatDto } from "../dtos/drone.dto";
+import { DroneStatus, OrderStatus, Prisma } from "@prisma/client";
+import {
+  CreateDroneDto,
+  UpdateDroneDto,
+  UpdateHeartbeatDto
+} from "../dtos/drone.dto";
 import { prisma } from "../config/database";
 
 class DroneService {
+  // Create a drone (for Admin)
+  async createOne(data: CreateDroneDto) {
+    return prisma.drone.create({ data });
+  }
+
   // List all drones (for Admin)
   async getAll(query: { status?: DroneStatus }) {
     return prisma.drone.findMany({
@@ -15,6 +24,27 @@ class DroneService {
     const drone = await prisma.drone.findUnique({ where: { id: droneId } });
     if (!drone) throw new Error("Drone not found");
     return drone;
+  }
+
+  async updateOneById(droneId: number, dto: UpdateDroneDto) {
+    const drone = await this.getOneById(droneId);
+    if (dto.status === DroneStatus.BROKEN) {
+      if (drone.status === DroneStatus.BROKEN)
+        throw new Error("Drone is already reported as broken");
+      return this.reportBroken(droneId);
+    }
+
+    const data: Prisma.DroneUpdateInput = {
+      ...(dto.status !== undefined && { status: dto.status }),
+      ...(dto.battery !== undefined && { battery: dto.battery }),
+      ...(dto.lat !== undefined && { lat: dto.lat }),
+      ...(dto.lng !== undefined && { lng: dto.lng })
+    };
+
+    return prisma.drone.update({
+      where: { id: droneId },
+      data
+    });
   }
 
   // Update Location & Battery
