@@ -1,12 +1,31 @@
 import { z } from "zod";
 
+export const PointStringSchema = z
+  .string()
+  .min(1, "Origin cannot be empty")
+  .refine((val) => {
+    const parts = val.split(",");
+    if (parts.length !== 2) return false;
+    const [lat, lng] = parts.map(Number);
+    return (
+      lat &&
+      lng &&
+      !Number.isNaN(lat) &&
+      !Number.isNaN(lng) &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lng >= -180 &&
+      lng <= 180
+    );
+  }, 'Origin must be in "lat,lng" format with valid coordinates');
+
 export const CreateOrderSchema = z.object({
-  origin: z.string().min(1),
-  destination: z.string().min(1)
+  origin: PointStringSchema,
+  destination: PointStringSchema
 });
 
 export const UpdateOrderDestSchema = z.object({
-  destination: z.string().min(1)
+  destination: PointStringSchema
 });
 
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
