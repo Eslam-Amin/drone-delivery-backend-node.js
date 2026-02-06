@@ -28,6 +28,34 @@ class DroneController {
       res.status(500).json({ error: err });
     }
   }
+  async getOneDrone(req: Request, res: Response) {
+    try {
+      const { droneId } = req.params;
+      const result = await droneService.getOneById(+droneId!);
+      res.status(200).json({
+        success: true,
+        message: "Drone fetched successfully",
+        data: result
+      });
+    } catch (err) {
+      res.status(500).json({ error: err });
+    }
+  }
+
+  async updateDrone(req: Request, res: Response) {
+    try {
+      const { droneId } = req.params;
+      const result = await droneService.updateOneById(+droneId!, req.body);
+      res.status(200).json({
+        success: true,
+        message: "Drone updated successfully",
+        data: result
+      });
+    } catch (err) {
+      res.status(500).json({ error: err });
+    }
+  }
+
   async updateHeartbeat(req: Request, res: Response) {
     try {
       const droneId = (req as any).entity.id;

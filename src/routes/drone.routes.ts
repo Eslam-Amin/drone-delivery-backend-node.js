@@ -16,6 +16,15 @@ router
     droneController.createDrone
   );
 
+router
+  .route("/:droneId")
+  .patch(
+    auth([Role.ADMIN]),
+    validate(CreateDroneSchema),
+    droneController.updateDrone
+  )
+  .get(auth([Role.ADMIN]), droneController.getOneDrone);
+
 // Drones only endpoints
 router.post(
   "/heartbeat",
