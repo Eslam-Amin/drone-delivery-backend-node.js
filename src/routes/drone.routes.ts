@@ -7,6 +7,11 @@ import { UpdateHeartbeatSchema } from "../dtos/drone.dto";
 
 const router = Router();
 
+router
+  .route("/")
+  .get(auth([Role.ADMIN]), droneController.getAllDrones)
+  .post(auth([Role.ADMIN]), droneController.createDrone);
+
 // Drones only endpoints
 router.post(
   "/heartbeat",
