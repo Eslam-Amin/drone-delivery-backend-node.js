@@ -1,5 +1,9 @@
 import { DroneStatus, OrderStatus } from "@prisma/client";
-import { CreateDroneDto, UpdateHeartbeatDto } from "../dtos/drone.dto";
+import {
+  CreateDroneDto,
+  UpdateDroneDto,
+  UpdateHeartbeatDto
+} from "../dtos/drone.dto";
 import { prisma } from "../config/database";
 
 class DroneService {
@@ -20,6 +24,14 @@ class DroneService {
     const drone = await prisma.drone.findUnique({ where: { id: droneId } });
     if (!drone) throw new Error("Drone not found");
     return drone;
+  }
+
+  async updateOneById(droneId: number, data: UpdateDroneDto) {
+    if (data.status === DroneStatus.BROKEN) {
+      return await this.reportBroken(droneId);
+    } else {
+      return prisma.drone.update({ where: { id: droneId }, data });
+    }
   }
 
   // Update Location & Battery
