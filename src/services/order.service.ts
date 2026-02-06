@@ -1,5 +1,5 @@
 import { OrderStatus } from "@prisma/client";
-import { CreateOrderDto } from "../dtos/order.dto";
+import { CreateOrderDto, UpdateOrderDestDto } from "../dtos/order.dto";
 import { prisma } from "../config/database";
 
 class OrderService {
@@ -25,6 +25,18 @@ class OrderService {
     return order;
   }
 
+  // Admin Bulk Get
+  async getAll() {
+    return prisma.order.findMany();
+  }
+
+  async updateOneById(orderId: number, data: UpdateOrderDestDto) {
+    return prisma.order.update({
+      where: { id: orderId },
+      data
+    });
+  }
+
   // Enduser Withdraws Order
   async withdrawOrder(orderId: number, userId: number) {
     const order = await prisma.order.findUnique({
@@ -36,11 +48,6 @@ class OrderService {
       throw new Error("Cannot withdraw order already in progress");
 
     return prisma.order.delete({ where: { id: orderId } });
-  }
-
-  // Admin Bulk Get
-  async getAll() {
-    return prisma.order.findMany();
   }
 }
 
