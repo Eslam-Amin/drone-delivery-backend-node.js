@@ -29,6 +29,7 @@ enum DroneStatus {
 enum OrderStatus {
   PENDING
   IN_PROGRESS
+  PICKED_UP
   DELIVERED
   FAILED
 }
