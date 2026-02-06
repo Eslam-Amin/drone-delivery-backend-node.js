@@ -52,8 +52,10 @@ class OrderController {
         message: "Order Updated Successfully",
         data: result
       });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update order" });
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to update order" });
     }
   }
 
