@@ -1,4 +1,4 @@
-import { signToken } from "../utils/jwt.utils";
+import { signToken } from "../utils/jwt";
 import { AuthTokenDto } from "../dtos/auth.dto";
 
 export class AuthService {
