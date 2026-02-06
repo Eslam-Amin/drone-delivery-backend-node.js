@@ -3,7 +3,11 @@ import { auth } from "../middlewares/auth.middleware";
 import droneController from "../controllers/drone.controller";
 import { Role } from "@prisma/client";
 import { validate } from "../middlewares/validator.middleware";
-import { CreateDroneSchema, UpdateHeartbeatSchema } from "../dtos/drone.dto";
+import {
+  CreateDroneSchema,
+  UpdateDroneSchema,
+  UpdateHeartbeatSchema
+} from "../dtos/drone.dto";
 
 const router = Router();
 
@@ -20,7 +24,7 @@ router
   .route("/:droneId")
   .patch(
     auth([Role.ADMIN]),
-    validate(CreateDroneSchema),
+    validate(UpdateDroneSchema),
     droneController.updateDrone
   )
   .get(auth([Role.ADMIN]), droneController.getOneDrone);
