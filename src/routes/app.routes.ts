@@ -11,7 +11,7 @@ appRoutes.use("/drones", droneRoutes);
 appRoutes.use("/orders", orderRoutes);
 
 // Health Check
-appRoutes.get("/", (req, res) => {
+appRoutes.get("/health", (_req, res) => {
   res.json({ status: "Penny Software Drone Backend is Active" });
 });
 
