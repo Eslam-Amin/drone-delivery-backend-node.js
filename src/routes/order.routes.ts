@@ -8,14 +8,21 @@ import orderController from "../controllers/order.controller";
 const router = Router();
 
 // Enduser: Submit Order
-router.post(
-  "/",
-  auth([Role.ENDUSER]),
-  validate(CreateOrderSchema),
-  orderController.createOrder
-);
+router
+  .route("/")
+  .post(
+    auth([Role.ENDUSER]),
+    validate(CreateOrderSchema),
+    orderController.createOrder
+  )
+  .get(auth([Role.ADMIN]), orderController.listOrders);
 
-// Admin: Get All Orders
-router.get("/", auth([Role.ADMIN]), orderController.listOrders);
+router.patch("/:orderId", auth([Role.ADMIN]), orderController.updateOrder);
+
+router.patch(
+  "/:orderId/withdraw",
+  auth([Role.ENDUSER]),
+  orderController.withdrawOrder
+);
 
 export default router;
