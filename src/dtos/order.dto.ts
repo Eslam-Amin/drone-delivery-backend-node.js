@@ -24,9 +24,10 @@ export const CreateOrderSchema = z.object({
   destination: PointStringSchema
 });
 
-export const UpdateOrderDestSchema = z.object({
-  destination: PointStringSchema
+export const UpdateOrderSchema = z.object({
+  origin: PointStringSchema.optional(),
+  destination: PointStringSchema.optional()
 });
 
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
-export type UpdateOrderDestDto = z.infer<typeof UpdateOrderDestSchema>;
+export type UpdateOrderDto = z.infer<typeof UpdateOrderSchema>;
