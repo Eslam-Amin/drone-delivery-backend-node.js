@@ -65,6 +65,11 @@ class DroneService {
 
     if (!order) throw new Error("No pending jobs available");
 
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: OrderStatus.IN_PROGRESS }
+    });
+
     // Assign it
     return prisma.drone.update({
       where: { id: droneId },

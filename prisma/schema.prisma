@@ -22,6 +22,7 @@ enum Role {
 enum DroneStatus {
   IDLE
   DELIVERING
+  RESERVED
   BROKEN
   RETURNING
 }

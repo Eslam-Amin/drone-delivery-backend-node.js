@@ -84,6 +84,20 @@ class DroneController {
       res.status(500).json({ error: "Failed to report broken status" });
     }
   }
+
+  async reserveJob(req: Request, res: Response) {
+    try {
+      const droneId = (req as any).entity.id;
+      const result = await droneService.reserveJob(droneId);
+      res.status(200).json({
+        success: true,
+        message: "Drone reserved successfully",
+        data: result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to reserve drone" });
+    }
+  }
 }
 
 export default new DroneController();

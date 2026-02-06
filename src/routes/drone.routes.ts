@@ -37,5 +37,6 @@ router.post(
   droneController.updateHeartbeat
 );
 router.post("/broken", auth([Role.DRONE]), droneController.reportBroken);
+router.post("/reserve-job", auth([Role.DRONE]), droneController.reserveJob);
 
 export default router;
