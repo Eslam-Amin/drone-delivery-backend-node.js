@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Drone" ADD COLUMN     "speed" DOUBLE PRECISION DEFAULT 40.0;

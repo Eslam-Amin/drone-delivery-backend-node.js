@@ -48,7 +48,7 @@ model Drone {
   lat            Float       @default(0.0) 
   lng           Float       @default(0.0)
   status         DroneStatus @default(IDLE)
-  speed         Int         @default(40)
+  speed         Float?         @default(40.0)
   
   // Relation: A drone can have one active order at a time
   currentOrder   Order?      @relation("DroneCurrentOrder") 

@@ -1,5 +1,5 @@
-import { OrderStatus } from "@prisma/client";
-import { CreateOrderDto } from "../dtos/order.dto";
+import { OrderStatus, Prisma } from "@prisma/client";
+import { CreateOrderDto, UpdateOrderDto } from "../dtos/order.dto";
 import { prisma } from "../config/database";
 
 class OrderService {
@@ -25,6 +25,24 @@ class OrderService {
     return order;
   }
 
+  // Admin Bulk Get
+  async getAll() {
+    return prisma.order.findMany();
+  }
+
+  async updateOneById(orderId: number, dto: UpdateOrderDto) {
+    const data: Prisma.OrderUpdateInput = {
+      ...(dto.destination !== undefined && { destination: dto.destination }),
+      ...(dto.origin !== undefined && { origin: dto.origin })
+    };
+    await this.getOneById(orderId);
+
+    return prisma.order.update({
+      where: { id: orderId },
+      data
+    });
+  }
+
   // Enduser Withdraws Order
   async withdrawOrder(orderId: number, userId: number) {
     const order = await prisma.order.findUnique({
@@ -38,9 +56,8 @@ class OrderService {
     return prisma.order.delete({ where: { id: orderId } });
   }
 
-  // Admin Bulk Get
-  async getAll() {
-    return prisma.order.findMany();
+  async getAllByUser(userId: number) {
+    return prisma.order.findMany({ where: { userId } });
   }
 }
 
