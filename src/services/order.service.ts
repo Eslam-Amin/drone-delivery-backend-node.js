@@ -1,6 +1,6 @@
-import { OrderStatus, PrismaClient } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 import { CreateOrderDto } from "../dtos/order.dto";
-const prisma = new PrismaClient();
+import { prisma } from "../config/database";
 
 class OrderService {
   // Submit Order
@@ -16,8 +16,8 @@ class OrderService {
   }
 
   // Get Order details
-  getOneById(orderId: number) {
-    const order = prisma.order.findUnique({
+  async getOneById(orderId: number) {
+    const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: { drone: true }
     });

@@ -1,6 +1,6 @@
-import { PrismaClient, DroneStatus, OrderStatus } from "@prisma/client";
+import { DroneStatus, OrderStatus } from "@prisma/client";
 import { UpdateHeartbeatDto } from "../dtos/drone.dto";
-const prisma = new PrismaClient();
+import { prisma } from "../config/database";
 
 class DroneService {
   // List all drones (for Admin)
