@@ -42,6 +42,33 @@ class OrderController {
       res.status(500).json({ error: "Failed to create order" });
     }
   }
+
+  async updateOrder(req: Request, res: Response) {
+    try {
+      const { orderId } = req.params;
+      const result = await orderService.updateOneById(+orderId!, req.body);
+      res.status(200).json({
+        success: true,
+        message: "Order Updated Successfully",
+        data: result
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update order" });
+    }
+  }
+
+  async withdrawOrder(req: Request, res: Response) {
+    try {
+      const { orderId } = req.params;
+      await orderService.withdrawOrder(+orderId!, (req as any).entity.id);
+      res.status(200).json({
+        success: true,
+        message: "Order Withdrawn Successfully"
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to withdraw order" });
+    }
+  }
 }
 
 export default new OrderController();
