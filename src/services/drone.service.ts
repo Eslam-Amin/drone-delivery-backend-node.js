@@ -6,6 +6,10 @@ import {
 } from "../dtos/drone.dto";
 import { prisma } from "../config/database";
 
+type GrabOrderResult =
+  | { ok: false; message: string }
+  | { ok: true; order: Order };
+
 class DroneService {
   // Create a drone (for Admin)
   async createOne(data: CreateDroneDto) {
