@@ -7,17 +7,20 @@ export const auth = (allowedRoles: string[]) => {
     if (!header)
       return res.status(401).json({ error: "Missing Authorization header" });
 
-    const token = header.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "Missing token" });
+    const bearerToken = header.split(" ");
+    if (bearerToken[0] !== "Bearer")
+      return res.status(401).json({ error: "Invalid Authorization header" });
+    if (!bearerToken[1])
+      return res.status(401).json({ error: "Missing token" });
     try {
-      const decoded = verifyToken(token);
+      const decoded = verifyToken(bearerToken[1]);
       if (!allowedRoles.includes(decoded.role)) {
         return res.status(403).json({ error: "Access Forbidden" });
       }
       (req as any).entity = decoded;
       next();
-    } catch (error) {
-      return res.status(401).json({ error: "Invalid or Expired Token" });
+    } catch (err) {
+      return res.status(401).json({ error: err });
     }
   };
 };
