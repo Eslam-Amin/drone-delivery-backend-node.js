@@ -61,7 +61,7 @@ model Order {
   origin      String      // Store as "lat,lng" string
   destination String      // Store as "lat,lng" string
   status      OrderStatus @default(PENDING)
-  
+  onTheWay    Boolean   @default(false)
   // Relations
   userId      Int
   user        User        @relation(fields: [userId], references: [id])
