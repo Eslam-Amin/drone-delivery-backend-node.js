@@ -1,14 +1,14 @@
 version: "3.8"
 
 services:
-  # 1. The Database Service
+  # Database Service
   postgres:
     image: postgres:15-alpine
     container_name: drone_delivery_postgres
     restart: always
     environment:
-      POSTGRES_USER: penny_user
-      POSTGRES_PASSWORD: penny_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: drone_delivery
     ports:
       - "5432:5432"
@@ -20,9 +20,27 @@ services:
       timeout: 5s
       retries: 5
 
+  # Your Node.js App
+  api:
+    build: .
+    container_name: drone_api
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: super_secret_key_change_me
+      # Connects to 'postgres' service, not localhost
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/drone_delivery?schema=public"
+
+  # pgAdmin Service (UI)
   pgadmin:
     image: dpage/pgadmin4
     container_name: penny_pgadmin
+    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@penny.co
       PGADMIN_DEFAULT_PASSWORD: root
