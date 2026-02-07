@@ -168,7 +168,7 @@ class DroneService {
     return {
       order: await prisma.order.update({
         where: { id: orderId },
-        data: { droneId, status: OrderStatus.IN_PROGRESS, onTheWay: true }
+        data: { droneId, status: OrderStatus.PICKED_UP, onTheWay: true }
       }),
       ok: true
     };
@@ -197,7 +197,7 @@ class DroneService {
           where: { id: orderId },
           data: {
             droneId: drone.id,
-            status: OrderStatus.IN_PROGRESS,
+            status: OrderStatus.PICKED_UP,
             onTheWay: true
           }
         })
