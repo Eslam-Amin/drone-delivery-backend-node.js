@@ -85,6 +85,20 @@ class OrderController {
       res.status(500).json({ error: "Failed to fetch order" });
     }
   }
+
+  async getDronsOrders(req: Request, res: Response) {
+    try {
+      const droneId = (req as any).entity.id;
+      const orders = await orderService.getAllByDrone(droneId);
+      res.status(200).json({
+        success: true,
+        message: "Orders Fetched Successfully",
+        data: orders
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order" });
+    }
+  }
 }
 
 export default new OrderController();
