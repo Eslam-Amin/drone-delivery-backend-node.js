@@ -19,9 +19,18 @@ class DroneService {
   }
 
   // List all drones (for Admin)
-  async getAll(query: { status?: DroneStatus }) {
+  async getAll(query: {
+    status?: DroneStatus | undefined;
+    page: number;
+    limit: number;
+  }) {
+    const filter = query.status ? { status: query.status } : {};
+    const page = query.page || 1;
+    const limit = query.limit || 10;
     return prisma.drone.findMany({
-      where: query
+      where: filter,
+      skip: (page - 1) * limit,
+      take: limit
     });
   }
 
