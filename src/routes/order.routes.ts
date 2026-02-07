@@ -33,4 +33,16 @@ router.patch(
   orderController.withdrawOrder
 );
 
+router.patch(
+  "/:orderId/delivered",
+  auth([Role.DRONE]),
+  orderController.markOrderAsDelivered
+);
+
+router.patch(
+  "/:orderId/failed",
+  auth([Role.DRONE]),
+  orderController.markOrderAsFailed
+);
+
 export default router;
