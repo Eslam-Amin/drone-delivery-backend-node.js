@@ -28,8 +28,31 @@ class OrderService {
   }
 
   // Admin Bulk Get
-  async getAll() {
-    return prisma.order.findMany();
+  async getAll(query: {
+    status?: OrderStatus | undefined;
+    userId?: number | undefined;
+    droneId?: number | undefined;
+    page: number;
+    limit: number;
+  }) {
+    const filter = {
+      ...(query.userId && { userId: query.userId }),
+      ...(query.droneId && { droneId: query.droneId }),
+      ...(query.status && { status: query.status })
+    };
+
+    const ordersCount = await prisma.order.count({
+      where: filter
+    });
+
+    return {
+      data: await prisma.order.findMany({
+        where: filter,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit
+      }),
+      count: ordersCount
+    };
   }
 
   async updateOneById(orderId: number, dto: UpdateOrderDto) {

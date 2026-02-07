@@ -20,18 +20,23 @@ class DroneService {
 
   // List all drones (for Admin)
   async getAll(query: {
-    status?: DroneStatus | undefined;
     page: number;
     limit: number;
+    status?: DroneStatus | undefined;
   }) {
     const filter = query.status ? { status: query.status } : {};
-    const page = query.page || 1;
-    const limit = query.limit || 10;
-    return prisma.drone.findMany({
-      where: filter,
-      skip: (page - 1) * limit,
-      take: limit
+    const dronesCount = await prisma.drone.count({
+      where: filter
     });
+
+    return {
+      data: await prisma.drone.findMany({
+        where: filter,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit
+      }),
+      count: dronesCount
+    };
   }
 
   // Find a specific drone
