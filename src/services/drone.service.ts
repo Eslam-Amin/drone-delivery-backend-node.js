@@ -6,9 +6,10 @@ import {
 } from "../dtos/drone.dto";
 import { prisma } from "../config/database";
 
-type GrabOrderResult =
+type ActionResult =
   | { ok: false; message: string }
-  | { ok: true; order: Order };
+  | { ok: true; type: "ORDER"; order: Order }
+  | { ok: true; type: "DRONE"; drone: Drone };
 
 class DroneService {
   // Create a drone (for Admin)
@@ -63,14 +64,14 @@ class DroneService {
   }
 
   // Drone "Grabs" an order
-  async reserveJob(droneId: number) {
+  async reserveJob(droneId: number): Promise<ActionResult> {
     // Find a PENDING order
     const order = await prisma.order.findFirst({
       where: { status: OrderStatus.PENDING, onTheWay: false },
       orderBy: { createdAt: "asc" } // earliest orders first
     });
 
-    if (!order) throw new Error("No pending jobs available");
+    if (!order) return { ok: false, message: "No pending jobs available" };
 
     await prisma.order.update({
       where: { id: order.id },
@@ -78,14 +79,18 @@ class DroneService {
     });
 
     // Assign it
-    return prisma.drone.update({
-      where: { id: droneId },
-      data: {
-        status: DroneStatus.RESERVED,
-        currentOrder: { connect: { id: order.id } }
-      },
-      include: { currentOrder: true }
-    });
+    return {
+      ok: true,
+      drone: await prisma.drone.update({
+        where: { id: droneId },
+        data: {
+          status: DroneStatus.RESERVED,
+          currentOrder: { connect: { id: order.id } }
+        },
+        include: { currentOrder: true }
+      }),
+      type: "DRONE"
+    };
   }
 
   // The "Rescue" Logic
@@ -134,7 +139,7 @@ class DroneService {
     return { message: "Drone marked BROKEN. No active order." };
   }
 
-  async grabOrder(droneId: number): Promise<GrabOrderResult> {
+  async grabOrder(droneId: number): Promise<ActionResult> {
     const drone = await this.getOneById(droneId);
     if (drone.status === DroneStatus.RESERVED) {
       return this.grabOrderFromOrigin(droneId);
@@ -146,7 +151,7 @@ class DroneService {
 
   private async grabOrderFromBrokenDrone(
     droneId: number
-  ): Promise<GrabOrderResult> {
+  ): Promise<ActionResult> {
     const brokenDroneOrder = await prisma.order.findFirst({
       where: { status: OrderStatus.PENDING, onTheWay: true },
       include: { drone: true },
@@ -170,11 +175,12 @@ class DroneService {
         where: { id: orderId },
         data: { droneId, status: OrderStatus.PICKED_UP, onTheWay: true }
       }),
-      ok: true
+      ok: true,
+      type: "ORDER"
     };
   }
 
-  private async grabOrderFromOrigin(droneId: number): Promise<GrabOrderResult> {
+  private async grabOrderFromOrigin(droneId: number): Promise<ActionResult> {
     const drone = await prisma.drone.findUnique({
       where: { id: droneId },
       include: { currentOrder: true }
@@ -200,7 +206,8 @@ class DroneService {
             status: OrderStatus.PICKED_UP,
             onTheWay: true
           }
-        })
+        }),
+        type: "ORDER"
       };
     }
     return { ok: false, message: "No order to grab" };
