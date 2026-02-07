@@ -1,6 +1,7 @@
 import { OrderStatus, Prisma } from "@prisma/client";
 import { CreateOrderDto, UpdateOrderDto } from "../dtos/order.dto";
 import { prisma } from "../config/database";
+import { ApiError } from "../utils/ApiError";
 
 class OrderService {
   // Submit Order
@@ -21,7 +22,7 @@ class OrderService {
       where: { id: orderId },
       include: { drone: true }
     });
-    if (!order) throw new Error("Order not found");
+    if (!order) throw ApiError.NotFound("Order not found");
     return order;
   }
 
@@ -48,10 +49,10 @@ class OrderService {
     const order = await prisma.order.findUnique({
       where: { id: orderId }
     });
-    if (!order) throw new Error("Order not found");
-    if (order.userId !== userId) throw new Error("unauthorized");
+    if (!order) throw ApiError.NotFound("Order not found");
+    if (order.userId !== userId) throw ApiError.Unauthorized();
     if (order.status !== OrderStatus.PENDING)
-      throw new Error("Cannot withdraw order already in progress");
+      throw ApiError.BadRequest("Cannot withdraw order already in progress");
 
     return prisma.order.delete({ where: { id: orderId } });
   }

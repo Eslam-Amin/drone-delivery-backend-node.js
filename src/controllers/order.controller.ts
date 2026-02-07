@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import orderService from "../services/order.service";
 import { OrderStatus } from "@prisma/client";
 
 class OrderController {
-  async createOrder(req: Request, res: Response) {
+  async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).entity.id;
       const result = await orderService.createOne(userId, req.body);
@@ -13,11 +13,11 @@ class OrderController {
         data: result
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to create order" });
+      next(error);
     }
   }
 
-  async getOrder(req: Request, res: Response) {
+  async getOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { orderId } = req.params;
       const order = await orderService.getOneById(+orderId!);
@@ -27,11 +27,11 @@ class OrderController {
         data: order
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to create order" });
+      next(error);
     }
   }
 
-  async listOrders(_req: Request, res: Response) {
+  async listOrders(_req: Request, res: Response, next: NextFunction) {
     try {
       const orders = await orderService.getAll();
       res.status(200).json({
@@ -40,11 +40,11 @@ class OrderController {
         data: orders
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to create order" });
+      next(error);
     }
   }
 
-  async updateOrder(req: Request, res: Response) {
+  async updateOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { orderId } = req.params;
       const result = await orderService.updateOneById(+orderId!, req.body);
@@ -54,13 +54,11 @@ class OrderController {
         data: result
       });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({ error: error.message || "Failed to update order" });
+      next(error);
     }
   }
 
-  async withdrawOrder(req: Request, res: Response) {
+  async withdrawOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { orderId } = req.params;
       await orderService.withdrawOrder(+orderId!, (req as any).entity.id);
@@ -69,11 +67,11 @@ class OrderController {
         message: "Order Withdrawn Successfully"
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to withdraw order" });
+      next(error);
     }
   }
 
-  async getUsersOrders(req: Request, res: Response) {
+  async getUsersOrders(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).entity.id;
       const orders = await orderService.getAllByUser(userId);
@@ -83,11 +81,11 @@ class OrderController {
         data: orders
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch order" });
+      next(error);
     }
   }
 
-  async getDronsOrders(req: Request, res: Response) {
+  async getDronsOrders(req: Request, res: Response, next: NextFunction) {
     try {
       const droneId = (req as any).entity.id;
       const orders = await orderService.getAllByDrone(droneId);
@@ -97,11 +95,11 @@ class OrderController {
         data: orders
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch order" });
+      next(error);
     }
   }
 
-  async markOrderAsDelivered(req: Request, res: Response) {
+  async markOrderAsDelivered(req: Request, res: Response, next: NextFunction) {
     try {
       const { orderId } = req.params;
       await orderService.updateOrderStatus(+orderId!, OrderStatus.DELIVERED);
@@ -110,10 +108,10 @@ class OrderController {
         message: "Order marked as delivered successfully"
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to mark order as delivered" });
+      next(error);
     }
   }
-  async markOrderAsFailed(req: Request, res: Response) {
+  async markOrderAsFailed(req: Request, res: Response, next: NextFunction) {
     try {
       const { orderId } = req.params;
       await orderService.updateOrderStatus(+orderId!, OrderStatus.FAILED);
@@ -122,7 +120,7 @@ class OrderController {
         message: "Order marked as failed successfully"
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to mark order as failed" });
+      next(error);
     }
   }
 }
