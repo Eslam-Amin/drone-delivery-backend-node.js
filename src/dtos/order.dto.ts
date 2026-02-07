@@ -31,6 +31,18 @@ export const UpdateOrderStatusSchema = z.object({
   status: z.enum(OrderStatus)
 });
 
+export const GetOrdersQuerySchema = z.object({
+  status: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(z.enum(OrderStatus))
+    .optional(),
+  userId: z.coerce.number().int().positive().optional(),
+  droneId: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(10)
+});
+
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
 export type UpdateOrderDto = z.infer<typeof UpdateOrderSchema>;
 export type UpdateOrderStatusDto = z.infer<typeof UpdateOrderStatusSchema>;
