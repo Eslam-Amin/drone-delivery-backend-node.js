@@ -85,14 +85,14 @@ class OrderController {
     }
   }
 
-  async getDronsOrders(req: Request, res: Response, next: NextFunction) {
+  async getDronesOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const droneId = (req as any).entity.id;
-      const orders = await orderService.getAllByDrone(droneId);
+      const order = await orderService.getDroneAssignedOrder(droneId);
       res.status(200).json({
         success: true,
         message: "Orders Fetched Successfully",
-        data: orders
+        data: order
       });
     } catch (error) {
       next(error);

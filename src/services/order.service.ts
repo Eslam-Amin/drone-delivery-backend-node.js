@@ -1,7 +1,8 @@
-import { OrderStatus, Prisma } from "@prisma/client";
+import { DroneStatus, OrderStatus, Prisma } from "@prisma/client";
 import { CreateOrderDto, UpdateOrderDto } from "../dtos/order.dto";
 import { prisma } from "../config/database";
 import { ApiError } from "../utils/ApiError";
+import droneService from "./drone.service";
 
 class OrderService {
   // Submit Order
@@ -61,11 +62,18 @@ class OrderService {
     return prisma.order.findMany({ where: { userId } });
   }
 
-  async getAllByDrone(droneId: number) {
-    return prisma.order.findMany({ where: { droneId } });
+  async getDroneAssignedOrder(droneId: number) {
+    return prisma.order.findFirst({
+      where: { droneId, status: OrderStatus.PENDING }
+    });
   }
 
   async updateOrderStatus(orderId: number, status: OrderStatus) {
+    const order = await this.getOneById(orderId);
+    if (status === OrderStatus.DELIVERED)
+      await droneService.updateOneById(order.droneId!, {
+        status: DroneStatus.RETURNING
+      });
     return prisma.order.update({
       where: { id: orderId },
       data: { status }

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import droneService from "../services/drone.service";
+import { GetDronesQuerySchema } from "../dtos/drone.dto";
 
 class DroneController {
   async createDrone(req: Request, res: Response, next: NextFunction) {
@@ -17,7 +18,8 @@ class DroneController {
 
   async getAllDrones(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await droneService.getAll(req.query);
+      const query = GetDronesQuerySchema.parse(req.query);
+      const result = await droneService.getAll(query);
 
       res.status(200).json({
         success: true,

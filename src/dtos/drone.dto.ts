@@ -32,6 +32,15 @@ export const UpdateDroneStatusSchema = z.object({
     .pipe(z.enum(DroneStatus))
 });
 
+export const GetDronesQuerySchema = z.object({
+  status: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(z.enum(DroneStatus)),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(10)
+});
+
 export type CreateDroneDto = z.infer<typeof CreateDroneSchema>;
 export type UpdateDroneDto = z.infer<typeof UpdateDroneSchema>;
 export type UpdateHeartbeatDto = z.infer<typeof UpdateHeartbeatSchema>;
