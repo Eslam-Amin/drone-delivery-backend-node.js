@@ -1,3 +1,4 @@
+import { OrderStatus } from "@prisma/client";
 import { z } from "zod";
 
 export const PointStringSchema = z
@@ -24,10 +25,12 @@ export const CreateOrderSchema = z.object({
   destination: PointStringSchema
 });
 
-export const UpdateOrderSchema = z.object({
-  origin: PointStringSchema.optional(),
-  destination: PointStringSchema.optional()
+export const UpdateOrderSchema = CreateOrderSchema.partial();
+
+export const UpdateOrderStatusSchema = z.object({
+  status: z.enum(OrderStatus)
 });
 
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
 export type UpdateOrderDto = z.infer<typeof UpdateOrderSchema>;
+export type UpdateOrderStatusDto = z.infer<typeof UpdateOrderStatusSchema>;

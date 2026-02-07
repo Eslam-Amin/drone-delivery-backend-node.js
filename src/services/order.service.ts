@@ -59,6 +59,17 @@ class OrderService {
   async getAllByUser(userId: number) {
     return prisma.order.findMany({ where: { userId } });
   }
+
+  async getAllByDrone(droneId: number) {
+    return prisma.order.findMany({ where: { droneId } });
+  }
+
+  async updateOrderStatus(orderId: number, status: OrderStatus) {
+    return prisma.order.update({
+      where: { id: orderId },
+      data: { status }
+    });
+  }
 }
 
 export default new OrderService();

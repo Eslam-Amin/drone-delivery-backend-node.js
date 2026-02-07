@@ -1,10 +1,14 @@
-import { DroneStatus, OrderStatus, Prisma } from "@prisma/client";
+import { Drone, DroneStatus, Order, OrderStatus, Prisma } from "@prisma/client";
 import {
   CreateDroneDto,
   UpdateDroneDto,
   UpdateHeartbeatDto
 } from "../dtos/drone.dto";
 import { prisma } from "../config/database";
+
+type GrabOrderResult =
+  | { ok: false; message: string }
+  | { ok: true; order: Order };
 
 class DroneService {
   // Create a drone (for Admin)
@@ -20,8 +24,11 @@ class DroneService {
   }
 
   // Find a specific drone
-  async getOneById(droneId: number) {
-    const drone = await prisma.drone.findUnique({ where: { id: droneId } });
+  async getOneById(droneId: number, options?: any): Promise<Drone> {
+    const drone = await prisma.drone.findUnique({
+      where: { id: droneId },
+      ...options
+    });
     if (!drone) throw new Error("Drone not found");
     return drone;
   }
@@ -59,17 +66,22 @@ class DroneService {
   async reserveJob(droneId: number) {
     // Find a PENDING order
     const order = await prisma.order.findFirst({
-      where: { status: OrderStatus.PENDING },
+      where: { status: OrderStatus.PENDING, onTheWay: false },
       orderBy: { createdAt: "asc" } // earliest orders first
     });
 
     if (!order) throw new Error("No pending jobs available");
 
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: OrderStatus.IN_PROGRESS }
+    });
+
     // Assign it
     return prisma.drone.update({
       where: { id: droneId },
       data: {
-        status: DroneStatus.DELIVERING,
+        status: DroneStatus.RESERVED,
         currentOrder: { connect: { id: order.id } }
       },
       include: { currentOrder: true }
@@ -82,7 +94,7 @@ class DroneService {
     const drone = await prisma.drone.findUnique({
       where: { id: droneId }
     });
-
+    const droneStatus = drone?.status;
     if (!drone) {
       throw new Error("Drone not found");
     }
@@ -109,7 +121,8 @@ class DroneService {
           status: OrderStatus.PENDING,
           droneId: null,
           // Origin becomes the broken drone's location
-          origin: `${drone.lat},${drone.lng}`
+          origin: `${drone.lat},${drone.lng}`,
+          onTheWay: droneStatus === DroneStatus.DELIVERING // if it was delivering, it's on the way
         }
       });
 
@@ -119,6 +132,78 @@ class DroneService {
     }
 
     return { message: "Drone marked BROKEN. No active order." };
+  }
+
+  async grabOrder(droneId: number): Promise<GrabOrderResult> {
+    const drone = await this.getOneById(droneId);
+    if (drone.status === DroneStatus.RESERVED) {
+      return this.grabOrderFromOrigin(droneId);
+    } else if (drone.status === DroneStatus.IDLE) {
+      return this.grabOrderFromBrokenDrone(droneId);
+    }
+    return { ok: false, message: "Drone is not available" };
+  }
+
+  private async grabOrderFromBrokenDrone(
+    droneId: number
+  ): Promise<GrabOrderResult> {
+    const brokenDroneOrder = await prisma.order.findFirst({
+      where: { status: OrderStatus.PENDING, onTheWay: true },
+      include: { drone: true },
+      orderBy: { createdAt: "asc" }
+    });
+
+    if (!brokenDroneOrder)
+      return { ok: false, message: "No pending jobs available" };
+    const { id: orderId } = brokenDroneOrder;
+    await prisma.drone.update({
+      where: { id: droneId },
+      data: {
+        status: DroneStatus.DELIVERING,
+        lat: parseFloat(brokenDroneOrder.origin.split(",")[0]!),
+        lng: parseFloat(brokenDroneOrder.origin.split(",")[1]!),
+        currentOrder: { connect: { id: orderId } }
+      }
+    });
+    return {
+      order: await prisma.order.update({
+        where: { id: orderId },
+        data: { droneId, status: OrderStatus.PICKED_UP, onTheWay: true }
+      }),
+      ok: true
+    };
+  }
+
+  private async grabOrderFromOrigin(droneId: number): Promise<GrabOrderResult> {
+    const drone = await prisma.drone.findUnique({
+      where: { id: droneId },
+      include: { currentOrder: true }
+    });
+    if (drone && drone.currentOrder) {
+      const orderId = drone.currentOrder.id;
+      await prisma.drone.update({
+        where: { id: droneId },
+        data: {
+          status: DroneStatus.DELIVERING,
+          currentOrder: { connect: { id: orderId } },
+          lat: parseFloat(drone.currentOrder.origin.split(",")[0]!),
+          lng: parseFloat(drone.currentOrder.origin.split(",")[1]!)
+        }
+      });
+
+      return {
+        ok: true,
+        order: await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            droneId: drone.id,
+            status: OrderStatus.PICKED_UP,
+            onTheWay: true
+          }
+        })
+      };
+    }
+    return { ok: false, message: "No order to grab" };
   }
 }
 
