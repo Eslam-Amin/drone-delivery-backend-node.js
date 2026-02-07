@@ -22,12 +22,12 @@ router
 
 router
   .route("/:droneId")
+  .get(auth([Role.ADMIN]), droneController.getOneDrone)
   .patch(
     auth([Role.ADMIN]),
     validate(UpdateDroneSchema),
     droneController.updateDrone
-  )
-  .get(auth([Role.ADMIN]), droneController.getOneDrone);
+  );
 
 // Drones only endpoints
 router.post(
