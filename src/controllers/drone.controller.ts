@@ -85,8 +85,7 @@ class DroneController {
       const result = await droneService.reportBroken(droneId);
       res.status(200).json({
         success: true,
-        message: "Drone reported as broken successfully",
-        data: result
+        message: result.message || "Drone reported as broken successfully"
       });
     } catch (error) {
       next(error);
