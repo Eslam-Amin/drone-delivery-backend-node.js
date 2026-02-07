@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import droneService from "../services/drone.service";
 
 class DroneController {
-  async createDrone(req: Request, res: Response) {
+  async createDrone(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await droneService.createOne(req.body);
       res.status(201).json({
@@ -10,12 +10,12 @@ class DroneController {
         message: "Drone Created Successfully",
         data: result
       });
-    } catch (err) {
-      res.status(500).json({ error: err });
+    } catch (error) {
+      next(error);
     }
   }
 
-  async getAllDrones(req: Request, res: Response) {
+  async getAllDrones(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await droneService.getAll(req.query);
 
@@ -24,11 +24,11 @@ class DroneController {
         message: "Drones fetched successfully",
         data: result
       });
-    } catch (err) {
-      res.status(500).json({ error: err });
+    } catch (error) {
+      next(error);
     }
   }
-  async getOneDrone(req: Request, res: Response) {
+  async getOneDrone(req: Request, res: Response, next: NextFunction) {
     try {
       const { droneId } = req.params;
       const result = await droneService.getOneById(+droneId!);
@@ -37,12 +37,12 @@ class DroneController {
         message: "Drone fetched successfully",
         data: result
       });
-    } catch (err) {
-      res.status(500).json({ error: err });
+    } catch (error) {
+      next(error);
     }
   }
 
-  async updateDrone(req: Request, res: Response) {
+  async updateDrone(req: Request, res: Response, next: NextFunction) {
     try {
       const { droneId } = req.params;
       const result = await droneService.updateOneById(+droneId!, req.body);
@@ -51,12 +51,12 @@ class DroneController {
         message: "Drone updated successfully",
         data: result
       });
-    } catch (err) {
-      res.status(500).json({ error: err });
+    } catch (error) {
+      next(error);
     }
   }
 
-  async updateHeartbeat(req: Request, res: Response) {
+  async updateHeartbeat(req: Request, res: Response, next: NextFunction) {
     try {
       const droneId = (req as any).entity.id;
 
@@ -66,12 +66,12 @@ class DroneController {
         message: "Heartbeat updated successfully",
         data: result
       });
-    } catch (err) {
-      res.status(500).json({ error: err });
+    } catch (error) {
+      next(error);
     }
   }
 
-  async reportBroken(req: Request, res: Response) {
+  async reportBroken(req: Request, res: Response, next: NextFunction) {
     try {
       const { droneId } = req.body;
       const result = await droneService.reportBroken(droneId);
@@ -80,12 +80,12 @@ class DroneController {
         message: "Drone reported as broken successfully",
         data: result
       });
-    } catch (e) {
-      res.status(500).json({ error: "Failed to report broken status" });
+    } catch (error) {
+      next(error);
     }
   }
 
-  async reserveJob(req: Request, res: Response) {
+  async reserveJob(req: Request, res: Response, next: NextFunction) {
     try {
       const droneId = (req as any).entity.id;
       const result = await droneService.reserveJob(droneId);
@@ -94,12 +94,12 @@ class DroneController {
         message: result.ok ? "Drone reserved successfully" : result.message,
         data: result.ok && result.type === "DRONE" ? result.drone : undefined
       });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message || "Failed to reserve drone" });
+    } catch (error) {
+      next(error);
     }
   }
 
-  async grabOrder(req: Request, res: Response) {
+  async grabOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const droneId = (req as any).entity.id;
       const result = await droneService.grabOrder(droneId);
@@ -111,8 +111,8 @@ class DroneController {
           : result.message,
         data: result.ok && result.type === "ORDER" ? result.order : undefined
       });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message || "Failed to reserve drone" });
+    } catch (error) {
+      next(error);
     }
   }
 }
