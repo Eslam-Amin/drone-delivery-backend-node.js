@@ -24,7 +24,13 @@ class DroneController {
       res.status(200).json({
         success: true,
         message: "Drones fetched successfully",
-        data: result
+        pagnination: {
+          page: query.page,
+          limit: query.limit,
+          count: result.count,
+          totalPages: Math.ceil(result.count / query.limit)
+        },
+        data: result.data
       });
     } catch (error) {
       next(error);
