@@ -5,6 +5,7 @@ import {
   UpdateHeartbeatDto
 } from "../dtos/drone.dto";
 import { prisma } from "../config/database";
+import { ApiError } from "../utils/ApiError";
 
 type ActionResult =
   | { ok: false; message: string }
@@ -30,7 +31,7 @@ class DroneService {
       where: { id: droneId },
       ...options
     });
-    if (!drone) throw new Error("Drone not found");
+    if (!drone) throw ApiError.NotFound("Drone not found");
     return drone;
   }
 
@@ -38,7 +39,7 @@ class DroneService {
     const drone = await this.getOneById(droneId);
     if (dto.status === DroneStatus.BROKEN) {
       if (drone.status === DroneStatus.BROKEN)
-        throw new Error("Drone is already reported as broken");
+        throw ApiError.BadRequest("Drone is already reported as broken");
       return this.reportBroken(droneId);
     }
 
@@ -101,7 +102,7 @@ class DroneService {
     });
     const droneStatus = drone?.status;
     if (!drone) {
-      throw new Error("Drone not found");
+      throw ApiError.NotFound("Drone not found");
     }
 
     // 2. Find active order assigned to this drone
