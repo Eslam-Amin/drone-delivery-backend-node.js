@@ -21,12 +21,17 @@ async function main() {
     )
   );
 
-  // Admin
-  await prisma.user.upsert({
-    where: { username: "admin" },
-    update: {},
-    create: { username: "admin", role: Role.ADMIN }
-  });
+  // --- ADMIN (10) ---
+  await Promise.all(
+    Array.from({ length: 10 }).map(() =>
+      prisma.user.create({
+        data: {
+          username: faker.internet.username(),
+          role: Role.ADMIN
+        }
+      })
+    )
+  );
 
   // --- DRONES (100) ---
   const drones = await Promise.all(
