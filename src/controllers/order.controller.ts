@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import orderService from "../services/order.service";
+import { OrderStatus } from "@prisma/client";
 
 class OrderController {
   async createOrder(req: Request, res: Response) {
@@ -83,6 +84,45 @@ class OrderController {
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch order" });
+    }
+  }
+
+  async getDronsOrders(req: Request, res: Response) {
+    try {
+      const droneId = (req as any).entity.id;
+      const orders = await orderService.getAllByDrone(droneId);
+      res.status(200).json({
+        success: true,
+        message: "Orders Fetched Successfully",
+        data: orders
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order" });
+    }
+  }
+
+  async markOrderAsDelivered(req: Request, res: Response) {
+    try {
+      const { orderId } = req.params;
+      await orderService.updateOrderStatus(+orderId!, OrderStatus.DELIVERED);
+      res.status(200).json({
+        success: true,
+        message: "Order marked as delivered successfully"
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark order as delivered" });
+    }
+  }
+  async markOrderAsFailed(req: Request, res: Response) {
+    try {
+      const { orderId } = req.params;
+      await orderService.updateOrderStatus(+orderId!, OrderStatus.FAILED);
+      res.status(200).json({
+        success: true,
+        message: "Order marked as failed successfully"
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark order as failed" });
     }
   }
 }

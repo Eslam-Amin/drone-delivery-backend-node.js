@@ -22,6 +22,7 @@ enum Role {
 enum DroneStatus {
   IDLE
   DELIVERING
+  RESERVED
   BROKEN
   RETURNING
 }
@@ -29,6 +30,7 @@ enum DroneStatus {
 enum OrderStatus {
   PENDING
   IN_PROGRESS
+  PICKED_UP
   DELIVERED
   FAILED
 }
@@ -59,7 +61,7 @@ model Order {
   origin      String      // Store as "lat,lng" string
   destination String      // Store as "lat,lng" string
   status      OrderStatus @default(PENDING)
-  
+  onTheWay    Boolean   @default(false)
   // Relations
   userId      Int
   user        User        @relation(fields: [userId], references: [id])
