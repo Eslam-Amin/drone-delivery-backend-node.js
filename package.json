@@ -1,28 +1,55 @@
 {
   "name": "drone-delivery-backend-node.js",
   "version": "1.0.0",
-  "description": "",
+  "description": "Drone Delivery System API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "docker:build": "npm run prisma:seed && docker-compose up --build",
+    "test": "docker-compose up -d postgres && npx prisma generate && dotenv -e .env.test -- npx prisma db push && dotenv -e .env.test -- jest  --runInBand",
+    "test:watch": "dotenv -e .env.test -- jest --watch"
   },
-  "keywords": [],
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "express",
+    "prisma",
+    "postgres"
+  ],
   "author": "Eslam Amin",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3"
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.18.0",
+    "swagger-ui-express": "^4.6.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.2.1",
+    "@types/pg": "^8.16.0",
+    "@types/supertest": "^6.0.3",
+    "@types/swagger-ui-express": "^4.1.8",
+    "dotenv-cli": "^11.0.0",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.11",
     "prisma": "^7.3.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

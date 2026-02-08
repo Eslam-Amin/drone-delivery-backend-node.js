@@ -9,8 +9,7 @@
     "module": "commonjs",
     "target": "es2021",
     "lib": ["es2021"],
-    "types": ["node"],
-
+    "types": ["node", "jest", "supertest"],
     // Other Outputs
     "sourceMap": true,
     "declaration": true,
@@ -21,7 +20,7 @@
     "exactOptionalPropertyTypes": true,
 
     // Style Options
-    "noImplicitReturns": true,
+    "noImplicitReturns": false,
     "noImplicitOverride": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -33,6 +32,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }

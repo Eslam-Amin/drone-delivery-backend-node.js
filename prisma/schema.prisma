@@ -11,3 +11,70 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// --- Enums ---
+enum Role {
+  ADMIN
+  ENDUSER
+  DRONE
+}
+
+enum UserRole {
+  ADMIN
+  ENDUSER
+}
+
+enum DroneStatus {
+  IDLE
+  DELIVERING
+  RESERVED
+  BROKEN
+  RETURNING
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  PICKED_UP
+  DELIVERED
+  FAILED
+}
+
+// --- Models ---
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  role     UserRole   // Links to the UserRole enum above
+  orders   Order[] // Relation: User has many orders
+}
+
+model Drone {
+  id             Int         @id @default(autoincrement())
+  battery        Int         @default(100)
+  lat            Float       @default(0.0) 
+  lng           Float       @default(0.0)
+  status         DroneStatus @default(IDLE)
+  speed         Float?         @default(40.0)
+  
+  // Relation: A drone can have one active order at a time
+  currentOrder   Order?      @relation("DroneCurrentOrder") 
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  origin      String      // Store as "lat,lng" string
+  destination String      // Store as "lat,lng" string
+  status      OrderStatus @default(PENDING)
+  onTheWay    Boolean   @default(false)
+  // Relations
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+  
+  // The drone currently carrying this order
+  droneId     Int?        @unique // Unique ensures a drone has only one active order
+  drone       Drone?      @relation("DroneCurrentOrder", fields: [droneId], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
