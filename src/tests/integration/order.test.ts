@@ -59,4 +59,27 @@ describe("Order Operations (V1)", () => {
     expect(res.body.data.length).toEqual(1);
     expect(res.body.data).toEqual([order]);
   });
+
+  it("should update an order", async () => {
+    const { token } = await setupAdmin();
+    const { user } = await setupUser();
+    const order = await createOrder("51.00,53.00", "55.00,56.00", user.id);
+
+    const res = await Request(app)
+      .patch(`/api/v1/orders/${order.id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        origin: "70.00,73.00",
+        destination: "74.00,75.00"
+      });
+    console.log("🚀 ~ res:", res.body);
+
+    const updatedOrder = await prisma.order.findUnique({
+      where: { id: order.id }
+    });
+
+    expect(res.statusCode).toEqual(200);
+    expect(updatedOrder?.origin).toEqual("70.00,73.00");
+    expect(updatedOrder?.destination).toEqual("74.00,75.00");
+  });
 });
