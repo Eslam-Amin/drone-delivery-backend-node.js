@@ -19,6 +19,11 @@ enum Role {
   DRONE
 }
 
+enum UserRole {
+  ADMIN
+  ENDUSER
+}
+
 enum DroneStatus {
   IDLE
   DELIVERING
@@ -40,7 +45,7 @@ enum OrderStatus {
 model User {
   id       Int    @id @default(autoincrement())
   username String @unique
-  role     Role   // Links to the Role enum above
+  role     UserRole   // Links to the UserRole enum above
   orders   Order[] // Relation: User has many orders
 }
 
