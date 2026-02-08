@@ -72,7 +72,6 @@ describe("Order Operations (V1)", () => {
         origin: "70.00,73.00",
         destination: "74.00,75.00"
       });
-    console.log("🚀 ~ res:", res.body);
 
     const updatedOrder = await prisma.order.findUnique({
       where: { id: order.id }
