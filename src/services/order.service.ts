@@ -28,13 +28,7 @@ class OrderService {
   }
 
   // Admin Bulk Get
-  async getAll(query: {
-    status?: OrderStatus | undefined;
-    userId?: number | undefined;
-    droneId?: number | undefined;
-    page: number;
-    limit: number;
-  }) {
+  async getAll(query: GetOrdersQueryDto) {
     const filter = {
       ...(query.userId && { userId: query.userId }),
       ...(query.droneId && { droneId: query.droneId }),
