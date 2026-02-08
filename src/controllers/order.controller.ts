@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import orderService from "../services/order.service";
 import { OrderStatus } from "@prisma/client";
-import { GetOrdersQuerySchema } from "../dtos/order.dto";
+import {
+  GetOrdersQuerySchema,
+  GetUsersOrdersQuerySchema
+} from "../dtos/order.dto";
 
 class OrderController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -83,9 +86,9 @@ class OrderController {
   async getUsersOrders(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).entity.id;
-      const query = GetOrdersQuerySchema.parse(req.query);
+      const query = GetUsersOrdersQuerySchema.parse(req.query);
       query.userId = userId;
-      const result = await orderService.getAll(query);
+      const result = await orderService.getAllByUser(query);
       res.status(200).json({
         success: true,
         message: "Orders Fetched Successfully",
