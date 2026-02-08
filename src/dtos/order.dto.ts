@@ -18,7 +18,7 @@ export const PointStringSchema = z
       lng >= -180 &&
       lng <= 180
     );
-  }, 'Origin must be in "lat,lng" format with valid coordinates');
+  }, 'Origin must be in "lat,lng" format with valid coordinates, and latitude must be between -90 and 90, and longitude must be between -180 and 180');
 
 export const CreateOrderSchema = z.object({
   origin: PointStringSchema,
