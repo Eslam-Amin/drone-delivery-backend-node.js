@@ -77,7 +77,7 @@ async function main() {
       prisma.order.update({
         where: { id: order.id },
         data: {
-          status: OrderStatus.IN_PROGRESS,
+          status: OrderStatus.PICKED_UP,
           onTheWay: true,
           droneId: drone.id
         }
