@@ -1,8 +1,14 @@
 import { DroneStatus, OrderStatus, Prisma } from "@prisma/client";
-import { CreateOrderDto, UpdateOrderDto } from "../dtos/order.dto";
+import {
+  CreateOrderDto,
+  GetOrdersQueryDto,
+  GetUsersOrdersQueryDto,
+  UpdateOrderDto
+} from "../dtos/order.dto";
 import { prisma } from "../config/database";
 import { ApiError } from "../utils/ApiError";
 import droneService from "./drone.service";
+import { computeEta } from "../utils/eta";
 
 class OrderService {
   // Submit Order
@@ -73,6 +79,28 @@ class OrderService {
       throw ApiError.BadRequest("Cannot withdraw order already in progress");
 
     return prisma.order.delete({ where: { id: orderId } });
+  }
+
+  async getAllByUser(query: GetUsersOrdersQueryDto) {
+    const filter = {
+      userId: query.userId!,
+      ...(query.status && { status: query.status })
+    };
+    let orders = await prisma.order.findMany({
+      where: filter,
+      skip: (query.page - 1) * query.limit,
+      take: query.limit,
+      include: { drone: true }
+    });
+
+    orders = orders.map((order) => ({
+      ...order,
+      eta: computeEta(order)
+    }));
+
+    const ordersCount = await prisma.order.count({ where: filter });
+
+    return { data: orders, count: ordersCount };
   }
 
   async getDroneAssignedOrder(droneId: number) {
