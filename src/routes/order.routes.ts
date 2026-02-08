@@ -26,6 +26,8 @@ router
   );
 
 router.get("/me", auth([Role.ENDUSER]), orderController.getUsersOrders);
+router.get("/current", auth([Role.DRONE]), orderController.getDronesOrder);
+
 router
   .route("/:orderId")
   .get(auth([Role.ADMIN]), orderController.getOrder)

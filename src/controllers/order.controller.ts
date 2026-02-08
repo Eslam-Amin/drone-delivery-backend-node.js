@@ -108,11 +108,13 @@ class OrderController {
   async getDronesOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const droneId = (req as any).entity.id;
-      const order = await orderService.getDroneAssignedOrder(droneId);
+      const result = await orderService.getDroneAssignedOrder(droneId);
       res.status(200).json({
         success: true,
-        message: "Orders Fetched Successfully",
-        data: order
+        message: result.ok
+          ? "Order Fetched Successfully"
+          : "No order assigned to this drone",
+        data: result.ok ? result.data : undefined
       });
     } catch (error) {
       next(error);
