@@ -1,9 +1,9 @@
 import { signToken } from "../../utils/jwt";
 import prisma from "../helpers/reset-db";
 
-export const setupUser = async () => {
+export const setupUser = async (username = "normal user") => {
   const user = await prisma.user.create({
-    data: { username: "buyer", role: "ENDUSER" }
+    data: { username, role: "ENDUSER" }
   });
   const token = signToken({ id: user.id, role: "ENDUSER" });
   return { user, token };
