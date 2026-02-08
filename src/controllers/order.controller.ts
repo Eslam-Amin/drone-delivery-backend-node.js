@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import orderService from "../services/order.service";
 import { OrderStatus } from "@prisma/client";
+import {
+  GetOrdersQuerySchema,
+  GetUsersOrdersQuerySchema
+} from "../dtos/order.dto";
 
 class OrderController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -31,13 +35,21 @@ class OrderController {
     }
   }
 
-  async listOrders(_req: Request, res: Response, next: NextFunction) {
+  async listOrders(req: Request, res: Response, next: NextFunction) {
     try {
-      const orders = await orderService.getAll();
+      const query = GetOrdersQuerySchema.parse(req.query);
+      const result = await orderService.getAll(query);
+
       res.status(200).json({
         success: true,
         message: "Orders Fetched Successfully",
-        data: orders
+        pagnination: {
+          page: query.page,
+          limit: query.limit,
+          count: result.count,
+          totalPages: Math.ceil(result.count / query.limit)
+        },
+        data: result.data
       });
     } catch (error) {
       next(error);
@@ -74,11 +86,19 @@ class OrderController {
   async getUsersOrders(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).entity.id;
-      const orders = await orderService.getAllByUser(userId);
+      const query = GetUsersOrdersQuerySchema.parse(req.query);
+      query.userId = userId;
+      const result = await orderService.getAllByUser(query);
       res.status(200).json({
         success: true,
         message: "Orders Fetched Successfully",
-        data: orders
+        pagnination: {
+          page: query.page,
+          limit: query.limit,
+          count: result.count,
+          totalPages: Math.ceil(result.count / query.limit)
+        },
+        data: result.data
       });
     } catch (error) {
       next(error);
@@ -88,11 +108,13 @@ class OrderController {
   async getDronesOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const droneId = (req as any).entity.id;
-      const order = await orderService.getDroneAssignedOrder(droneId);
+      const result = await orderService.getDroneAssignedOrder(droneId);
       res.status(200).json({
         success: true,
-        message: "Orders Fetched Successfully",
-        data: order
+        message: result.ok
+          ? "Order Fetched Successfully"
+          : "No order assigned to this drone",
+        data: result.ok ? result.data : undefined
       });
     } catch (error) {
       next(error);

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import droneService from "../services/drone.service";
 import { GetDronesQuerySchema } from "../dtos/drone.dto";
+import { Drone } from "@prisma/client";
 
 class DroneController {
   async createDrone(req: Request, res: Response, next: NextFunction) {
@@ -24,7 +25,13 @@ class DroneController {
       res.status(200).json({
         success: true,
         message: "Drones fetched successfully",
-        data: result
+        pagnination: {
+          page: query.page,
+          limit: query.limit,
+          count: result.count,
+          totalPages: Math.ceil(result.count / query.limit)
+        },
+        data: result.data
       });
     } catch (error) {
       next(error);
@@ -47,11 +54,17 @@ class DroneController {
   async updateDrone(req: Request, res: Response, next: NextFunction) {
     try {
       const { droneId } = req.params;
-      const result = await droneService.updateOneById(+droneId!, req.body);
+      const result = (await droneService.updateOneById(
+        +droneId!,
+        req.body
+      )) as {
+        message: string;
+        data: Drone;
+      };
       res.status(200).json({
         success: true,
-        message: "Drone updated successfully",
-        data: result
+        message: result.message ? result.message : "Drone updated successfully",
+        data: result.data
       });
     } catch (error) {
       next(error);
@@ -75,12 +88,11 @@ class DroneController {
 
   async reportBroken(req: Request, res: Response, next: NextFunction) {
     try {
-      const { droneId } = req.body;
+      const droneId = (req as any).entity.id;
       const result = await droneService.reportBroken(droneId);
       res.status(200).json({
         success: true,
-        message: "Drone reported as broken successfully",
-        data: result
+        message: result.message || "Drone reported as broken successfully"
       });
     } catch (error) {
       next(error);

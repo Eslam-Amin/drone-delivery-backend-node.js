@@ -1,4 +1,4 @@
-import { DroneStatus, OrderStatus, Role } from "@prisma/client";
+import { DroneStatus, OrderStatus, UserRole } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import { prisma } from "../src/config/database";
 
@@ -15,7 +15,7 @@ async function main() {
       prisma.user.create({
         data: {
           username: faker.internet.username(),
-          role: Role.ENDUSER
+          role: UserRole.ENDUSER
         }
       })
     )
@@ -27,7 +27,7 @@ async function main() {
       prisma.user.create({
         data: {
           username: faker.internet.username(),
-          role: Role.ADMIN
+          role: UserRole.ADMIN
         }
       })
     )
@@ -77,7 +77,7 @@ async function main() {
       prisma.order.update({
         where: { id: order.id },
         data: {
-          status: OrderStatus.IN_PROGRESS,
+          status: OrderStatus.PICKED_UP,
           onTheWay: true,
           droneId: drone.id
         }

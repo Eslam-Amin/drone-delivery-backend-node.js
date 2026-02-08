@@ -36,7 +36,8 @@ export const GetDronesQuerySchema = z.object({
   status: z
     .string()
     .transform((val) => val.toUpperCase())
-    .pipe(z.enum(DroneStatus)),
+    .pipe(z.enum(DroneStatus))
+    .optional(),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10)
 });
