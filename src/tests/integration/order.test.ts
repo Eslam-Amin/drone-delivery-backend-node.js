@@ -1,7 +1,12 @@
 import Request from "supertest";
 import app from "../../app";
 import prisma, { resetDB, disconnectDB } from "../helpers/reset-db";
-import { createOrder, setupAdmin, setupUser } from "../helpers/setup";
+import {
+  createOrder,
+  setupAdmin,
+  setupDrone,
+  setupUser
+} from "../helpers/setup";
 
 beforeEach(async () => {
   await resetDB();
@@ -80,5 +85,82 @@ describe("Order Operations (V1)", () => {
     expect(res.statusCode).toEqual(200);
     expect(updatedOrder?.origin).toEqual("70.00,73.00");
     expect(updatedOrder?.destination).toEqual("74.00,75.00");
+  });
+
+  it("shouldn't update an order with invalid data", async () => {
+    const { token } = await setupAdmin();
+    const { user } = await setupUser();
+    const order = await createOrder("51.00,53.00", "55.00,56.00", user.id);
+
+    const res = await Request(app)
+      .patch(`/api/v1/orders/${order.id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        origin: "City 1"
+      });
+
+    expect(res.statusCode).toEqual(400); // Bad Request
+  });
+
+  it("shouldn't update an order with invalid role", async () => {
+    const { user, token } = await setupUser();
+    const order = await createOrder("51.00,53.00", "55.00,56.00", user.id);
+
+    const res = await Request(app)
+      .patch(`/api/v1/orders/${order.id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        origin: "70.00,73.00"
+      });
+
+    expect(res.statusCode).toEqual(403); // Forbidden
+  });
+
+  it("should withdraw an order", async () => {
+    const { user, token } = await setupUser();
+    const order = await createOrder("51.00,53.00", "55.00,56.00", user.id);
+
+    const res = await Request(app)
+      .patch(`/api/v1/orders/${order.id}/withdraw`)
+      .set("Authorization", `Bearer ${token}`)
+      .send();
+
+    expect(res.statusCode).toEqual(200);
+  });
+
+  it("should not withdraw an order of another user", async () => {
+    const { token } = await setupUser("user 1");
+    const { user: anotherUser } = await setupUser("another user");
+    const order = await createOrder(
+      "51.00,53.00",
+      "55.00,56.00",
+      anotherUser.id
+    );
+
+    const res = await Request(app)
+      .patch(`/api/v1/orders/${order.id}/withdraw`)
+      .set("Authorization", `Bearer ${token}`)
+      .send();
+
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it("shouldn't withdraw an order that is in progress", async () => {
+    const { user, token } = await setupUser();
+    const { drone } = await setupDrone();
+
+    const order = await createOrder("51.00,53.00", "55.00,56.00", user.id);
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: "IN_PROGRESS", droneId: drone.id }
+    });
+
+    const res = await Request(app)
+      .patch(`/api/v1/orders/${order.id}/withdraw`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({});
+
+    expect(res.statusCode).toEqual(400);
   });
 });
