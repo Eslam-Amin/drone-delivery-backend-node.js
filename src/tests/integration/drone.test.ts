@@ -58,7 +58,7 @@ describe("Drone Operations (V1)", () => {
       data: {
         origin: "Warehouse A",
         destination: "Customer Home",
-        status: "IN_PROGRESS", // or IN_TRANSIT depending on your Enum
+        status: "IN_PROGRESS",
         userId: user.id,
         droneId: drone.id
       }
