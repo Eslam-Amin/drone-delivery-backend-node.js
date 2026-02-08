@@ -8,9 +8,20 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "docker:build": "npm run prisma:seed && docker-compose up --build"
+    "//_docker_comment": "Builds images and starts containers. Run seed manually after DB is up.",
+    "docker:build": "npm run prisma:seed && docker-compose up --build",
+    "//_test_comment": "Loads .env.test (localhost) -> Runs Migrations -> Runs Jest",
+    "test": "dotenv -e .env.test -- npx prisma migrate deploy && dotenv -e .env.test -- jest",
+    "//_test_watch_comment": "Watch mode for development",
+    "test:watch": "dotenv -e .env.test -- jest --watch"
   },
-  "keywords": [],
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "express",
+    "prisma",
+    "postgres"
+  ],
   "author": "Eslam Amin",
   "license": "ISC",
   "type": "commonjs",
