@@ -1,4 +1,4 @@
-import { DroneStatus, OrderStatus, Prisma } from "@prisma/client";
+import { DroneStatus, OrderStatus, Prisma, Order } from "@prisma/client";
 import {
   CreateOrderDto,
   GetOrdersQueryDto,
@@ -9,6 +9,8 @@ import { prisma } from "../config/database";
 import { ApiError } from "../utils/ApiError";
 import droneService from "./drone.service";
 import { computeEta } from "../utils/eta";
+
+type ActionResult = { ok: false; message: string } | { ok: true; data: Order };
 
 class OrderService {
   // Submit Order
@@ -103,10 +105,18 @@ class OrderService {
     return { data: orders, count: ordersCount };
   }
 
-  async getDroneAssignedOrder(droneId: number) {
-    return prisma.order.findFirst({
-      where: { droneId, status: OrderStatus.PENDING }
+  async getDroneAssignedOrder(droneId: number): Promise<ActionResult> {
+    const order = await prisma.order.findFirst({
+      where: {
+        droneId,
+        status: {
+          in: [OrderStatus.IN_PROGRESS, OrderStatus.PICKED_UP]
+        }
+      }
     });
+    if (!order)
+      return { ok: false, message: "No order assigned to this drone" };
+    return { ok: true, data: order };
   }
 
   async updateOrderStatus(orderId: number, status: OrderStatus) {
