@@ -121,6 +121,7 @@ A complete, interactive API reference is generated automatically.
 
 - **URL:** `http://localhost:3000/api-docs`
 - **Postman Collection** `https://documenter.getpostman.com/view/23525113/2sBXc8qj5H`
+- **Postman Collection:** [Postman Documentation](https://documenter.getpostman.com/view/23525113/2sBXc8qj5H)
 
 You can use this UI to test endpoints, authorize with JWT tokens, and view request/response schemas.
 
