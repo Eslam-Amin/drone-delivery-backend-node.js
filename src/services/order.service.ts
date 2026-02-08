@@ -81,10 +81,6 @@ class OrderService {
     return prisma.order.delete({ where: { id: orderId } });
   }
 
-  async getAllByUser(userId: number) {
-    return prisma.order.findMany({ where: { userId } });
-  }
-
   async getDroneAssignedOrder(droneId: number) {
     return prisma.order.findFirst({
       where: { droneId, status: OrderStatus.PENDING }

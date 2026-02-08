@@ -83,11 +83,19 @@ class OrderController {
   async getUsersOrders(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).entity.id;
-      const orders = await orderService.getAllByUser(userId);
+      const query = GetOrdersQuerySchema.parse(req.query);
+      query.userId = userId;
+      const result = await orderService.getAll(query);
       res.status(200).json({
         success: true,
         message: "Orders Fetched Successfully",
-        data: orders
+        pagnination: {
+          page: query.page,
+          limit: query.limit,
+          count: result.count,
+          totalPages: Math.ceil(result.count / query.limit)
+        },
+        data: result.data
       });
     } catch (error) {
       next(error);
