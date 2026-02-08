@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "prisma:seed": "ts-node prisma/seed.ts",
     "docker:build": "npm run prisma:seed && docker-compose up --build",
-    "test": "docker-compose up -d postgres && npx prisma generate && npx prisma migrate deploy && dotenv -e .env.test -- jest",
+    "test": "docker-compose up -d postgres && npx prisma generate && dotenv -e .env.test -- npx prisma db push && dotenv -e .env.test -- jest",
     "test:watch": "dotenv -e .env.test -- jest --watch"
   },
   "keywords": [
