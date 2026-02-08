@@ -35,7 +35,11 @@
         "properties": {
           "id": { "type": "integer", "example": 1 },
           "name": { "type": "string", "example": "alice" },
-          "role": { "type": "string", "example": "ENDUSER" }
+          "role": {
+            "type": "string",
+            "enum": ["ADMIN", "ENDUSER", "DRONE"],
+            "example": "ENDUSER"
+          }
         },
         "required": ["id", "name", "role"]
       },
@@ -43,25 +47,191 @@
         "type": "object",
         "properties": {
           "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "role": { "type": "string" }
+          "username": { "type": "string" },
+          "role": { "type": "string", "enum": ["ADMIN", "ENDUSER"] }
         }
       },
       "Drone": {
         "type": "object",
         "properties": {
           "id": { "type": "integer" },
-          "serial": { "type": "string" },
-          "status": { "type": "string" }
+          "battery": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "type": "number",
+            "format": "float",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "speed": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "status": {
+            "type": "string",
+            "enum": ["IDLE", "DELIVERING", "RESERVED", "BROKEN", "RETURNING"]
+          }
         }
+      },
+      "CreateDrone": {
+        "type": "object",
+        "properties": {
+          "battery": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "type": "number",
+            "format": "float",
+            "minimum": -180,
+            "maximum": 180
+          }
+        },
+        "required": ["battery", "lat", "lng"]
+      },
+      "UpdateDrone": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["IDLE", "DELIVERING", "RESERVED", "BROKEN", "RETURNING"]
+          },
+          "battery": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "type": "number",
+            "format": "float",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "DroneHeartbeat": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "type": "number",
+            "format": "float",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "battery": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "speed": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": ["lat", "lng", "battery", "speed"]
       },
       "Order": {
         "type": "object",
         "properties": {
           "id": { "type": "integer" },
-          "pickup": { "type": "string" },
-          "dropoff": { "type": "string" },
-          "status": { "type": "string" }
+          "origin": {
+            "type": "string",
+            "description": "Coordinates as 'lat,lng'"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Coordinates as 'lat,lng'"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "PICKED_UP",
+              "DELIVERED",
+              "FAILED"
+            ]
+          },
+          "userId": { "type": "integer" },
+          "droneId": { "type": "integer", "nullable": true },
+          "onTheWay": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateOrder": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "description": "Coordinates as 'lat,lng' format",
+            "example": "40.7128,-74.0060"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Coordinates as 'lat,lng' format",
+            "example": "40.7589,-73.9851"
+          }
+        },
+        "required": ["origin", "destination"]
+      },
+      "UpdateOrder": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "description": "Coordinates as 'lat,lng' format"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Coordinates as 'lat,lng' format"
+          }
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "pagnination": {
+            "type": "object",
+            "properties": {
+              "page": { "type": "integer" },
+              "limit": { "type": "integer" },
+              "count": { "type": "integer" },
+              "totalPages": { "type": "integer" }
+            }
+          },
+          "data": { "type": "array" }
         }
       }
     }
@@ -105,7 +275,11 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "token": { "type": "string" } }
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "type": "string", "description": "JWT token" }
+                  }
                 }
               }
             }
@@ -115,14 +289,15 @@
     },
     "/users": {
       "get": {
-        "summary": "List users",
+        "summary": "List users with optional role filter",
         "tags": ["Users"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
             "name": "role",
             "in": "query",
-            "schema": { "type": "string" }
+            "description": "Filter by user role",
+            "schema": { "type": "string", "enum": ["ADMIN", "ENDUSER"] }
           }
         ],
         "responses": {
@@ -131,8 +306,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/User" }
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/User" }
+                    }
+                  }
                 }
               }
             }
@@ -142,30 +324,75 @@
     },
     "/drones": {
       "get": {
-        "summary": "List drones (admin)",
+        "summary": "List drones with pagination and filters (admin only)",
         "tags": ["Drones"],
         "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by drone status",
+            "schema": {
+              "type": "string",
+              "enum": ["IDLE", "DELIVERING", "RESERVED", "BROKEN", "RETURNING"]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
         "responses": {
-          "200": { "description": "List of drones" }
+          "200": {
+            "description": "Paginated list of drones",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
+              }
+            }
+          }
         }
       },
       "post": {
-        "summary": "Create drone (admin)",
+        "summary": "Create a new drone (admin only)",
         "tags": ["Drones"],
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/Drone" }
+              "schema": { "$ref": "#/components/schemas/CreateDrone" }
             }
           }
         },
-        "responses": { "201": { "description": "Drone created" } }
+        "responses": {
+          "201": {
+            "description": "Drone created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
       }
     },
     "/drones/{droneId}": {
       "get": {
-        "summary": "Get a drone by id (admin)",
+        "summary": "Get a drone by ID (admin only)",
         "tags": ["Drones"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -176,10 +403,19 @@
             "schema": { "type": "integer" }
           }
         ],
-        "responses": { "200": { "description": "Drone object" } }
+        "responses": {
+          "200": {
+            "description": "Drone object",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
       },
       "patch": {
-        "summary": "Update drone (admin)",
+        "summary": "Update drone (admin only)",
         "tags": ["Drones"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -193,45 +429,256 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/Drone" }
+              "schema": { "$ref": "#/components/schemas/UpdateDrone" }
             }
           }
         },
-        "responses": { "200": { "description": "Updated" } }
+        "responses": {
+          "200": {
+            "description": "Drone updated successfully"
+          }
+        }
+      }
+    },
+    "/drones/heartbeat": {
+      "post": {
+        "summary": "Drone heartbeat - update location, battery, and speed (drone only)",
+        "tags": ["Drones"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DroneHeartbeat" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Heartbeat accepted"
+          }
+        }
+      }
+    },
+    "/drones/broken": {
+      "post": {
+        "summary": "Report drone as broken (drone only)",
+        "tags": ["Drones"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "droneId": { "type": "integer" }
+                },
+                "required": ["droneId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Drone reported as broken successfully"
+          }
+        }
+      }
+    },
+    "/drones/reserve-order": {
+      "post": {
+        "summary": "Drone reserve an order (drone only)",
+        "tags": ["Drones"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Order reserved for drone"
+          }
+        }
+      }
+    },
+    "/drones/grab-order": {
+      "post": {
+        "summary": "Drone grab an order for delivery (drone only)",
+        "tags": ["Drones"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Order grabbed by drone successfully"
+          }
+        }
       }
     },
     "/orders": {
       "post": {
-        "summary": "Create order (enduser)",
+        "summary": "Create an order (enduser only)",
         "tags": ["Orders"],
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/Order" }
+              "schema": { "$ref": "#/components/schemas/CreateOrder" }
             }
           }
         },
-        "responses": { "201": { "description": "Order created" } }
+        "responses": {
+          "201": {
+            "description": "Order created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
       },
       "get": {
-        "summary": "List orders (admin)",
+        "summary": "List orders with pagination and filters (admin only)",
         "tags": ["Orders"],
         "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "Orders list" } }
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by order status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "IN_PROGRESS",
+                "PICKED_UP",
+                "DELIVERED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "droneId",
+            "in": "query",
+            "description": "Filter by drone ID",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of orders",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
+              }
+            }
+          }
+        }
       }
     },
     "/orders/me": {
       "get": {
-        "summary": "Get user's orders (enduser)",
+        "summary": "Get current user's orders with pagination (enduser only)",
         "tags": ["Orders"],
         "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "User orders" } }
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by order status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "IN_PROGRESS",
+                "PICKED_UP",
+                "DELIVERED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user's orders",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/current": {
+      "get": {
+        "summary": "Get current assigned order for drone (drone only)",
+        "tags": ["Orders"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Current order assigned to drone, or null if no order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "oneOf": [
+                        { "$ref": "#/components/schemas/Order" },
+                        { "type": "null" }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/orders/{orderId}": {
       "get": {
-        "summary": "Get order (admin)",
+        "summary": "Get order by ID (admin only)",
         "tags": ["Orders"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -242,10 +689,14 @@
             "schema": { "type": "integer" }
           }
         ],
-        "responses": { "200": { "description": "Order" } }
+        "responses": {
+          "200": {
+            "description": "Order details"
+          }
+        }
       },
       "patch": {
-        "summary": "Update order (admin)",
+        "summary": "Update order (admin only)",
         "tags": ["Orders"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -259,11 +710,75 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/Order" }
+              "schema": { "$ref": "#/components/schemas/UpdateOrder" }
             }
           }
         },
-        "responses": { "200": { "description": "Updated" } }
+        "responses": {
+          "200": {
+            "description": "Order updated successfully"
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/withdraw": {
+      "patch": {
+        "summary": "Withdraw order (enduser only - order creator)",
+        "tags": ["Orders"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order withdrawn successfully"
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/delivered": {
+      "patch": {
+        "summary": "Mark order as delivered (drone only)",
+        "tags": ["Orders"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order marked as delivered successfully"
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/failed": {
+      "patch": {
+        "summary": "Mark order as failed (drone only)",
+        "tags": ["Orders"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order marked as failed successfully"
+          }
+        }
       }
     }
   }
