@@ -104,6 +104,7 @@ If you prefer running Node.js locally while using a local Postgres instance:
 3. Start server:
 
 ```bash
+npm i
 npm run dev
 
 ```
