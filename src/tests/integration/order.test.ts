@@ -1,7 +1,7 @@
 import Request from "supertest";
 import app from "../../app";
 import prisma, { resetDB, disconnectDB } from "../helpers/reset-db";
-import { signToken } from "../../utils/jwt";
+import { createOrder, setupAdmin, setupUser } from "../helpers/setup";
 
 beforeEach(async () => {
   await resetDB();
@@ -12,14 +12,6 @@ afterAll(async () => {
 });
 
 describe("Order Operations (V1)", () => {
-  const setupUser = async () => {
-    const user = await prisma.user.create({
-      data: { username: "buyer", role: "ENDUSER" }
-    });
-    const token = signToken({ id: user.id, role: "ENDUSER" });
-    return { user, token };
-  };
-
   it("should create a valid order", async () => {
     const { token } = await setupUser();
 
