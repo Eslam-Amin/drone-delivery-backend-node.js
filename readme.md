@@ -101,12 +101,16 @@ If you prefer running Node.js locally while using a local Postgres instance:
 
 1. Update `.env` to use `localhost`.
 2. Run migrations: `npx prisma migrate dev`.
-3. Start server:
+3. Install Dependencies:
 
 ```bash
 npm i
-npm run dev
+```
 
+4. Start server:
+
+```bash
+npm run dev
 ```
 
 ---
