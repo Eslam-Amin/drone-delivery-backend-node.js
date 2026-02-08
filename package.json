@@ -7,7 +7,8 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "docker:build": "npm run prisma:seed && docker-compose up --build"
   },
   "keywords": [],
   "author": "Eslam Amin",
