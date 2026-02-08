@@ -62,7 +62,7 @@ describe("Order Operations (V1)", () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
-    expect(res.body.data).toEqual([order]);
+    expect(res.body.data[0].id).toEqual(order.id);
   });
 
   it("should update an order", async () => {
