@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { auth } from "../middlewares/auth.middleware";
 import { Role } from "@prisma/client";
-import { CreateOrderSchema, UpdateOrderSchema } from "../dtos/order.dto";
+import {
+  CreateOrderSchema,
+  GetOrdersQuerySchema,
+  UpdateOrderSchema
+} from "../dtos/order.dto";
 import { validate } from "../middlewares/validator.middleware";
 import orderController from "../controllers/order.controller";
 
@@ -15,7 +19,11 @@ router
     validate(CreateOrderSchema),
     orderController.createOrder
   )
-  .get(auth([Role.ADMIN]), orderController.listOrders);
+  .get(
+    auth([Role.ADMIN]),
+    validate(GetOrdersQuerySchema, "query"),
+    orderController.listOrders
+  );
 
 router.get("/me", auth([Role.ENDUSER]), orderController.getUsersOrders);
 router

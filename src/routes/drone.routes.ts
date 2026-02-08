@@ -5,6 +5,7 @@ import { Role } from "@prisma/client";
 import { validate } from "../middlewares/validator.middleware";
 import {
   CreateDroneSchema,
+  GetDronesQuerySchema,
   UpdateDroneSchema,
   UpdateHeartbeatSchema
 } from "../dtos/drone.dto";
@@ -13,7 +14,11 @@ const router = Router();
 
 router
   .route("/")
-  .get(auth([Role.ADMIN]), droneController.getAllDrones)
+  .get(
+    auth([Role.ADMIN]),
+    validate(GetDronesQuerySchema, "query"),
+    droneController.getAllDrones
+  )
   .post(
     auth([Role.ADMIN]),
     validate(CreateDroneSchema),
