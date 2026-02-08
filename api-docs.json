@@ -1,0 +1,248 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Penny Software - Drone Delivery API",
+    "version": "1.0.0",
+    "description": "API documentation for the Drone Delivery backend"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Local server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AuthToken": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "alice" },
+          "role": { "type": "string", "example": "ENDUSER" }
+        },
+        "required": ["id", "name", "role"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      },
+      "Drone": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "serial": { "type": "string" },
+          "status": { "type": "string" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "pickup": { "type": "string" },
+          "dropoff": { "type": "string" },
+          "status": { "type": "string" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "status": { "type": "string" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/token": {
+      "post": {
+        "summary": "Generate JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthToken" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "token": { "type": "string" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "List users",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/User" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drones": {
+      "get": {
+        "summary": "List drones (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of drones" }
+        }
+      },
+      "post": {
+        "summary": "Create drone (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Drone" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Drone created" } }
+      }
+    },
+    "/drones/{droneId}": {
+      "get": {
+        "summary": "Get a drone by id (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "droneId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": { "200": { "description": "Drone object" } }
+      },
+      "patch": {
+        "summary": "Update drone (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "droneId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Drone" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated" } }
+      }
+    },
+    "/orders": {
+      "post": {
+        "summary": "Create order (enduser)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Order" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Order created" } }
+      },
+      "get": {
+        "summary": "List orders (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "Orders list" } }
+      }
+    },
+    "/orders/me": {
+      "get": {
+        "summary": "Get user's orders (enduser)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "User orders" } }
+      }
+    },
+    "/orders/{orderId}": {
+      "get": {
+        "summary": "Get order (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": { "200": { "description": "Order" } }
+      },
+      "patch": {
+        "summary": "Update order (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Order" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated" } }
+      }
+    }
+  }
+}
