@@ -18,7 +18,7 @@ export const setupAdmin = async () => {
 
 export const setupDrone = async () => {
   const drone = await prisma.drone.create({
-    data: { battery: 100, lat: 0, lng: 0, speed: 30 }
+    data: { battery: 100, lat: 0.0, lng: 0.0, speed: 30.0, status: "IDLE" }
   });
   const token = signToken({ id: drone.id, role: "DRONE" });
   return { drone, token };
