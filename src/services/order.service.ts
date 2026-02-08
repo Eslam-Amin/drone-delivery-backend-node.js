@@ -7,7 +7,6 @@ import {
 } from "../dtos/order.dto";
 import { prisma } from "../config/database";
 import { ApiError } from "../utils/ApiError";
-import droneService from "./drone.service";
 import { computeEta } from "../utils/eta";
 
 type ActionResult = { ok: false; message: string } | { ok: true; data: Order };
@@ -121,13 +120,24 @@ class OrderService {
 
   async updateOrderStatus(orderId: number, status: OrderStatus) {
     const order = await this.getOneById(orderId);
-    if (status === OrderStatus.DELIVERED)
-      await droneService.updateOneById(order.droneId!, {
-        status: DroneStatus.RETURNING
+    if (order.status !== OrderStatus.PICKED_UP)
+      throw ApiError.BadRequest("Order is not picked up yet");
+    return await prisma.$transaction(async (tx) => {
+      // If delivered, update the drone status
+      if (status === OrderStatus.DELIVERED && order.droneId) {
+        await tx.drone.update({
+          where: { id: order.droneId },
+          data: { status: DroneStatus.RETURNING }
+        });
+      }
+
+      // Update the order status
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: { status }
       });
-    return prisma.order.update({
-      where: { id: orderId },
-      data: { status }
+
+      return updatedOrder;
     });
   }
 }

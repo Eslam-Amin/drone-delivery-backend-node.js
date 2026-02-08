@@ -80,32 +80,44 @@ class DroneService {
 
   // Drone "Grabs" an order
   async reserveJob(droneId: number): Promise<ActionResult> {
-    // Find a PENDING order
-    const order = await prisma.order.findFirst({
-      where: { status: OrderStatus.PENDING, onTheWay: false },
-      orderBy: { createdAt: "asc" } // earliest orders first
-    });
+    const drone = await this.getOneById(droneId);
+    if (drone.status === DroneStatus.BROKEN)
+      return { ok: false, message: "Drone is not available" };
 
-    if (!order) return { ok: false, message: "No pending jobs available" };
+    return await prisma.$transaction(async (tx) => {
+      // Find the earliest PENDING order that is not already on the way
+      const order = await tx.order.findFirst({
+        where: { status: OrderStatus.PENDING, onTheWay: false },
+        orderBy: { createdAt: "asc" }
+      });
 
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { status: OrderStatus.IN_PROGRESS }
-    });
+      if (!order) {
+        return { ok: false, message: "No pending jobs available" };
+      }
 
-    // Assign it
-    return {
-      ok: true,
-      drone: await prisma.drone.update({
+      // Update the order status
+      await tx.order.update({
+        where: { id: order.id },
+        data: { status: OrderStatus.IN_PROGRESS }
+      });
+
+      //  Assign the order to the drone
+      const updatedDrone = await tx.drone.update({
         where: { id: droneId },
         data: {
           status: DroneStatus.RESERVED,
           currentOrder: { connect: { id: order.id } }
         },
         include: { currentOrder: true }
-      }),
-      type: "DRONE"
-    };
+      });
+
+      //  Return result
+      return {
+        ok: true,
+        drone: updatedDrone,
+        type: "DRONE"
+      };
+    });
   }
 
   // The "Rescue" Logic
