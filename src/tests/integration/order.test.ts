@@ -49,7 +49,7 @@ describe("Order Operations (V1)", () => {
     expect(res.statusCode).toEqual(400); // Bad Request
   });
 
-  it("should list all orders", async () => {
+  it("should list all user's orders", async () => {
     const { user, token } = await setupUser();
     const order = await prisma.order.create({
       data: {
