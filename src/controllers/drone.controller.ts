@@ -88,7 +88,7 @@ class DroneController {
 
   async reportBroken(req: Request, res: Response, next: NextFunction) {
     try {
-      const { droneId } = req.body;
+      const droneId = (req as any).entity.id;
       const result = await droneService.reportBroken(droneId);
       res.status(200).json({
         success: true,
