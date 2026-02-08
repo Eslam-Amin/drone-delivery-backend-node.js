@@ -14,7 +14,7 @@ export class AuthService {
     } else {
       const user = await userService.getOneById(id);
       if (!user) throw ApiError.NotFound("User not found");
-      else if (user.role !== role) throw ApiError.Unauthorized();
+      else if (user.role !== role) throw ApiError.Unauthorized("role mismatch");
     }
     return { token: signToken(data) };
   }
