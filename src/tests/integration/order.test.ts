@@ -48,4 +48,23 @@ describe("Order Operations (V1)", () => {
 
     expect(res.statusCode).toEqual(400); // Bad Request
   });
+
+  it("should list all orders", async () => {
+    const { user, token } = await setupUser();
+    const order = await prisma.order.create({
+      data: {
+        origin: "51.00,53.00",
+        destination: "55.00,56.00",
+        userId: user.id
+      }
+    });
+
+    const res = await Request(app)
+      .get("/api/v1/orders/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.length).toEqual(1);
+    expect(res.body.data).toEqual([order]);
+  });
 });
