@@ -115,7 +115,7 @@ npm run dev
 
 ---
 
-## 📚 API Documentation (Swagger)
+## 📚 API Documentation 
 
 A complete, interactive API reference is generated automatically.
 
